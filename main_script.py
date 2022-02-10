@@ -1,4 +1,6 @@
 import pygame
+from collections import deque
+
 
 pygame.init()
 
@@ -60,6 +62,9 @@ class GraphNode:
     def select_barrier(self):
         self.color = BARRIER_COLOR
 
+    def set_visited(self):
+        self.color = VISITED_COLOR
+
     def is_start(self):
         return self.color == START_COLOR
 
@@ -71,6 +76,9 @@ class GraphNode:
 
     def not_barrier(self):
         return self.color != BARRIER_COLOR
+
+    def been_visited(self):
+        return self.color == VISITED_COLOR
 
     def reset_neighbors(self, grid):
         self.neighbors = []
@@ -182,8 +190,7 @@ def main():
                             current = grid[row][col]
                             current.reset_neighbors(grid)
 
-                    # Place to call algorithm
-                    path = None
+                    path = BFS(grid, start, end)
                     if not path:
                         print("PATH NOT FOUND")
                         return 0
@@ -242,6 +249,26 @@ def get_grid_pos(pos):
     row = (x - SIDE_SIZE) // SQUARE_SIZE
 
     return row, col
+
+
+def BFS(grid, start, end):
+    path = [start]
+    bfs_queue = deque([[start, path]])
+
+    while bfs_queue:
+        current, path = bfs_queue.popleft()
+
+        if not current.is_start:
+            current.set_visited()
+
+        draw(grid)
+        for neighbor in current.neighbors:
+            if not neighbor.been_visited() and not neighbor.is_start():
+                if neighbor is end:
+                    return path + [neighbor]
+                else:
+                    neighbor.set_visited()
+                    bfs_queue.append([neighbor, path + [neighbor]])
 
 
 if __name__ == "__main__":
