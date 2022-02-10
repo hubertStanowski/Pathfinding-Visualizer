@@ -263,13 +263,10 @@ def BFS(grid, start, end):
     while bfs_queue:
         current, path = bfs_queue.popleft()
 
-        if not current.is_start:
-            current.set_visited()
-
         draw(grid)
         for neighbor in current.neighbors:
-            if not neighbor.been_visited() and not neighbor.is_start():
-                if neighbor is end:
+            if not neighbor.been_visited():
+                if neighbor.is_end():
                     return path + [neighbor]
                 else:
                     neighbor.set_visited()
@@ -288,9 +285,8 @@ def DFS(grid, current, target, visited=None):
         return visited
 
     draw(grid)
-
     for neighbor in current.neighbors:
-        if neighbor not in visited:
+        if not neighbor.been_visited():
             path = DFS(grid, neighbor, target, visited)
             if path:
                 return path
