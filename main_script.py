@@ -136,6 +136,7 @@ def main():
     start, end = None, None
     buttons = [Button("BFS", 50, 60), Button("DFS", 50, 200),
                Button("Dijkstra's", 50, 340, -54), Button("A*", 50, 480, 20)]
+    finished = False
     while True:
         WINDOW.fill(BLACK)
         draw(grid, buttons)
@@ -183,7 +184,7 @@ def main():
                     node.select_neighbors(grid)
 
             if event.type == pygame.KEYDOWN:
-                if event.key in [pygame.K_RETURN, pygame.K_SPACE] and start and end:
+                if event.key in [pygame.K_RETURN, pygame.K_SPACE] and start and end and not finished:
                     # Run selected algorithm
                     for row in range(GRID_SIZE):
                         for col in range(GRID_SIZE):
@@ -191,6 +192,7 @@ def main():
                             current.reset_neighbors(grid)
 
                     path = BFS(grid, start, end)
+                    finished = True
                     if not path:
                         print("PATH NOT FOUND")
                         return 0
@@ -201,6 +203,7 @@ def main():
                     grid = [[GraphNode(row, col) for col in range(GRID_SIZE)]
                             for row in range(GRID_SIZE)]
                     start, end = None, None
+                    finished = False
 
 
 def draw(grid, buttons=[]):
