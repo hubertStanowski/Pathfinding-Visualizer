@@ -63,7 +63,9 @@ class GraphNode:
         self.color = BARRIER_COLOR
 
     def set_visited(self):
-        self.color = VISITED_COLOR
+        self.visited = True
+        if not self.is_start() and not self.is_end():
+            self.color = VISITED_COLOR
 
     def is_start(self):
         return self.color == START_COLOR
@@ -191,7 +193,7 @@ def main():
                             current = grid[row][col]
                             current.reset_neighbors(grid)
 
-                    path = BFS(grid, start, end)
+                    path = DFS(grid, start, end)
                     finished = True
                     if not path:
                         print("PATH NOT FOUND")
@@ -272,6 +274,26 @@ def BFS(grid, start, end):
                 else:
                     neighbor.set_visited()
                     bfs_queue.append([neighbor, path + [neighbor]])
+
+
+def DFS(grid, current, target, visited=None):
+    # List for recreating the path
+    if visited == None:
+        visited = []
+
+    current.set_visited()
+    visited.append(current)
+
+    if current == target:
+        return visited
+
+    draw(grid)
+
+    for neighbor in current.neighbors:
+        if neighbor not in visited:
+            path = DFS(grid, neighbor, target, visited)
+            if path:
+                return path
 
 
 if __name__ == "__main__":
