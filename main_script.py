@@ -257,7 +257,7 @@ def get_grid_pos(pos):
     return row, col
 
 
-# <<< Remove end from parameters when buttons done >>>
+# <<< Remove target from parameters when buttons done >>>
 def BFS(grid, start, end):
     path = [start]
     bfs_queue = deque([[start, path]])
@@ -275,6 +275,7 @@ def BFS(grid, start, end):
                     bfs_queue.append([neighbor, path + [neighbor]])
 
 
+# <<< Remove end from parameters when buttons done >>>
 def DFS(grid, current, target, visited=None):
     # List for recreating the path
     if visited == None:
@@ -283,7 +284,7 @@ def DFS(grid, current, target, visited=None):
     current.set_visited()
     visited.append(current)
 
-    if current == target:
+    if current.is_end():
         return visited
 
     draw(grid)
