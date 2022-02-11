@@ -1,6 +1,7 @@
 import pygame
 from collections import deque
-
+from math import inf
+from heapq import heappop, heappush
 
 pygame.init()
 
@@ -44,8 +45,8 @@ class GraphNode:
         self.color = FREE_COLOR
         self.neighbors = []
         self.visited = False
-        self.source_dist = None
-        self.path = None
+        self.source_dist = inf
+        self.path = []
 
     def pos(self):
         return self.x, self.y
@@ -193,7 +194,7 @@ def main():
                             current = grid[row][col]
                             current.reset_neighbors(grid)
 
-                    path = DFS(grid, start, end)
+                    path = dijkstras(grid, start, end)
                     finished = True
                     if not path:
                         print("PATH NOT FOUND")
@@ -256,6 +257,7 @@ def get_grid_pos(pos):
     return row, col
 
 
+# <<< Remove end from parameters when buttons done >>>
 def BFS(grid, start, end):
     path = [start]
     bfs_queue = deque([[start, path]])
@@ -290,6 +292,26 @@ def DFS(grid, current, target, visited=None):
             path = DFS(grid, neighbor, target, visited)
             if path:
                 return path
+
+
+def dijkstras(grid, start, end):
+    start.source_dist = 0
+    to_visit = [start]
+
+    while to_visit:
+        current = heappop(to_visit)
+        current.set_visited()
+
+        draw(grid)
+        for neighbor in current.neighbors:
+            new_dist = current.source_dist + 1
+            new_path = current.path + [current]
+            if new_dist < neighbor.source_dist:
+                neighbor.source_dist = new_dist
+                neighbor.path = new_path
+                heappush(to_visit, neighbor)
+            if current.is_end():
+                return end.path
 
 
 if __name__ == "__main__":
