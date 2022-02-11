@@ -1,8 +1,8 @@
 import pygame
 from collections import deque
-from math import inf
+from math import inf, sqrt
 from heapq import heappop, heappush
-
+from queue import PriorityQueue
 pygame.init()
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
@@ -45,7 +45,8 @@ class GraphNode:
         self.color = FREE_COLOR
         self.neighbors = []
         self.visited = False
-        self.source_dist = inf
+        self.source_dist = inf  # g score in a*
+        self.target_dist = inf  # f score in a*
         self.path = []
 
     def pos(self):
@@ -102,6 +103,9 @@ class GraphNode:
             self.neighbors.append(grid[self.row-1][self.col])
 
     def __lt__(self, other):
+        if self.target_dist is not inf:
+            return self.target_dist < other.target_dist
+
         return self.source_dist < other.source_dist
 
     # DEBUGGING TOOL
@@ -194,7 +198,7 @@ def main():
                             current = grid[row][col]
                             current.reset_neighbors(grid)
 
-                    path = dijkstras(grid, start, end)
+                    path = astar(grid, start, end)
                     finished = True
                     if not path:
                         print("PATH NOT FOUND")
@@ -313,6 +317,59 @@ def dijkstras(grid, start, end):
                 heappush(to_visit, neighbor)
             if current.is_end():
                 return end.path
+
+
+def astar(grid, start, end):
+    open_pqueue = PriorityQueue()
+    open_pqueue.put(start)
+    parents = {}
+    start.source_dist = 0
+    # refactor into get_pos?
+    start.source_dist = h((start.row, start.col), (end.row, end.col))
+    open_set = set([start])
+
+    while not open_pqueue.empty():
+        current = open_pqueue.get()
+        current.set_visited()
+        open_set.remove(current)  # closing the node
+
+        if current.is_end():
+            path = [end]
+            temp = end
+            while not temp.is_start():
+                temp = parents[temp]
+                path.append(temp)
+
+            return path
+
+        draw(grid)
+        for neighbor in current.neighbors:
+            new_g_score = current.source_dist + 1
+            if new_g_score < neighbor.source_dist:
+                parents[neighbor] = current
+                neighbor.source_dist = new_g_score
+                neighbor.target_dist = new_g_score + \
+                    h((neighbor.row, neighbor.col), (end.row, end.col))
+                if neighbor not in open_set:
+                    open_pqueue.put(neighbor)
+                    open_set.add(neighbor)
+                    neighbor.set_visited()
+
+
+def h(pos1, pos2):
+    x1, y1 = pos1
+    x2, y2 = pos2
+    h = abs(x1 - x2) + abs(y1 - y2)
+
+    return h
+
+
+def h_euclidean(pos1, pos2):
+    x1, y1 = pos1
+    x2, y2 = pos2
+    h = sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+    return h
 
 
 if __name__ == "__main__":
