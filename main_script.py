@@ -31,6 +31,7 @@ PATH_COLOR = (186, 85, 211)
 VISITED_COLOR = BLUE
 START_COLOR = GREEN
 END_COLOR = RED
+BUTTON_COLOR = PATH_COLOR
 
 WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Pathfinding Algorithms Visualizer")
@@ -120,14 +121,14 @@ class GraphNode:
 
 
 class Button:
-    def __init__(self, algorithm, text, x, y, offset=0):
+    def __init__(self, algorithm, text, x, y, offset=0, color=WHITE):
         self.algorithm = algorithm
         self.text = text
         self.x = x
         self.y = y
         self.offset = offset
         self.rect = pygame.Rect(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)
-        self.color = WHITE
+        self.color = color
 
     def draw(self):
         pygame.draw.rect(WINDOW, self.color, self.rect)
@@ -143,12 +144,14 @@ def main():
             for row in range(GRID_SIZE)]
     start, end = None, None
     algo_buttons = [Button(BFS, "BFS", 50, 60), Button(DFS, "DFS", 50, 200),
-                    Button(dijkstras, "Dijkstra's", 50, 340, -54), Button(astar, "A*", 50, 480, 20)]
+                    Button(dijkstras, "Dijkstra's", 50, 340, offset=-54), Button(astar, "A*", 50, 480, offset=20)]
+    other_buttons = [Button(None, "RESET", 50, 700, offset=-25,
+                            color=RED), Button(None, "RUN", 50, 840, color=GREEN)]
     finished = False
     selected_algorithm = None
     while True:
         WINDOW.fill(BLACK)
-        draw(grid, algo_buttons)
+        draw(grid, algo_buttons, other_buttons)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return 0
@@ -171,13 +174,36 @@ def main():
                 else:
                     for button in algo_buttons:
                         if button.rect.collidepoint(pos):
-                            button.color = PATH_COLOR
+                            button.color = BUTTON_COLOR
                             selected_algorithm = button.algorithm
                             button.draw()
                             for other in algo_buttons:
                                 if other is not button:
                                     other.color = WHITE
                                     other.draw()
+                    for button in other_buttons:
+                        if button.rect.collidepoint(pos):
+                            if button.text == "RESET":
+                                grid = [[GraphNode(row, col) for col in range(GRID_SIZE)]
+                                        for row in range(GRID_SIZE)]
+                                start, end = None, None
+                                finished = False
+                            elif button.text == "RUN":
+                                if start and end and not finished and selected_algorithm:
+                                    # Run selected algorithm
+                                    for row in range(GRID_SIZE):
+                                        for col in range(GRID_SIZE):
+                                            current = grid[row][col]
+                                            current.reset_neighbors(grid)
+
+                                    path = selected_algorithm(grid, start, end)
+
+                                    finished = True
+                                    if not path:
+                                        print("PATH NOT FOUND")
+                                        return 0
+                                    else:
+                                        draw_path(grid, path, start, end)
 
             if pygame.mouse.get_pressed()[2]:
                 pos = pygame.mouse.get_pos()
@@ -202,6 +228,7 @@ def main():
                     node = grid[row][col]
                     node.select_neighbors(grid)
 
+            # Left in case sb prefers to use keyboard over buttons
             if event.type == pygame.KEYDOWN:
                 if event.key in [pygame.K_RETURN, pygame.K_SPACE] and start and end and not finished and selected_algorithm:
                     # Run selected algorithm
@@ -226,8 +253,8 @@ def main():
                     finished = False
 
 
-def draw(grid, buttons=[]):
-    for button in buttons:
+def draw(grid, algo_buttons=[], other_buttons=[]):
+    for button in (algo_buttons + other_buttons):
         button.draw()
     draw_grid(grid)
     pygame.display.update()
