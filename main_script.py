@@ -120,7 +120,8 @@ class GraphNode:
 
 
 class Button:
-    def __init__(self, text, x, y, offset=0):
+    def __init__(self, algorithm, text, x, y, offset=0):
+        self.algorithm = algorithm
         self.text = text
         self.x = x
         self.y = y
@@ -141,20 +142,21 @@ def main():
     grid = [[GraphNode(row, col) for col in range(GRID_SIZE)]
             for row in range(GRID_SIZE)]
     start, end = None, None
-    buttons = [Button("BFS", 50, 60), Button("DFS", 50, 200),
-               Button("Dijkstra's", 50, 340, -54), Button("A*", 50, 480, 20)]
+    algo_buttons = [Button(BFS, "BFS", 50, 60), Button(DFS, "DFS", 50, 200),
+                    Button(dijkstras, "Dijkstra's", 50, 340, -54), Button(astar, "A*", 50, 480, 20)]
     finished = False
+    selected_algorithm = None
     while True:
         WINDOW.fill(BLACK)
-        draw(grid, buttons)
+        draw(grid, algo_buttons)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return 0
 
             if pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()
-
                 row, col = get_grid_pos(pos)
+
                 if row < GRID_SIZE and row >= 0 and col < GRID_SIZE and col >= 0:
                     node = grid[row][col]
                     if node.is_free():
@@ -166,6 +168,16 @@ def main():
                             end = node
                         else:
                             node.select_barrier()
+                else:
+                    for button in algo_buttons:
+                        if button.rect.collidepoint(pos):
+                            button.color = PATH_COLOR
+                            selected_algorithm = button.algorithm
+                            button.draw()
+                            for other in algo_buttons:
+                                if other is not button:
+                                    other.color = WHITE
+                                    other.draw()
 
             if pygame.mouse.get_pressed()[2]:
                 pos = pygame.mouse.get_pos()
@@ -191,14 +203,15 @@ def main():
                     node.select_neighbors(grid)
 
             if event.type == pygame.KEYDOWN:
-                if event.key in [pygame.K_RETURN, pygame.K_SPACE] and start and end and not finished:
+                if event.key in [pygame.K_RETURN, pygame.K_SPACE] and start and end and not finished and selected_algorithm:
                     # Run selected algorithm
                     for row in range(GRID_SIZE):
                         for col in range(GRID_SIZE):
                             current = grid[row][col]
                             current.reset_neighbors(grid)
 
-                    path = astar(grid, start, end)
+                    path = selected_algorithm(grid, start, end)
+
                     finished = True
                     if not path:
                         print("PATH NOT FOUND")
@@ -279,8 +292,7 @@ def BFS(grid, start, end):
                     bfs_queue.append([neighbor, path + [neighbor]])
 
 
-# <<< Remove end from parameters when buttons done >>>
-def DFS(grid, current, target, visited=None):
+def DFS(grid, current, end, visited=None):
     # List for recreating the path
     if visited == None:
         visited = []
@@ -294,7 +306,7 @@ def DFS(grid, current, target, visited=None):
     draw(grid)
     for neighbor in current.neighbors:
         if not neighbor.been_visited():
-            path = DFS(grid, neighbor, target, visited)
+            path = DFS(grid, neighbor, end, visited)
             if path:
                 return path
 
