@@ -20,6 +20,7 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 GRAY = (128, 128, 128)
 BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
 
 
 FONT = None
@@ -79,11 +80,20 @@ class GraphNode:
     def is_free(self):
         return self.color == FREE_COLOR
 
+    def is_barrier(self):
+        return self.color == BARRIER_COLOR
+
     def not_barrier(self):
         return self.color != BARRIER_COLOR
 
     def been_visited(self):
         return self.color == VISITED_COLOR
+
+    def copy(self):
+        new = GraphNode(self.row, self.col)
+        new.color = self.color
+
+        return new
 
     def reset_neighbors(self, grid):
         self.neighbors = []
@@ -143,10 +153,10 @@ def main():
     grid = [[GraphNode(row, col) for col in range(GRID_SIZE)]
             for row in range(GRID_SIZE)]
     start, end = None, None
-    algo_buttons = [Button(BFS, "BFS", 50, 60), Button(DFS, "DFS", 50, 200),
-                    Button(dijkstras, "Dijkstra's", 50, 340, offset=-54), Button(astar, "A*", 50, 480, offset=20)]
-    other_buttons = [Button(None, "RESET", 50, 700, offset=-25,
-                            color=RED), Button(None, "RUN", 50, 840, color=GREEN)]
+    algo_buttons = [Button(BFS, "BFS", 50, 50), Button(DFS, "DFS", 50, 170),
+                    Button(dijkstras, "Dijkstra's", 50, 290, offset=-54), Button(astar, "A*", 50, 410, offset=20)]
+    other_buttons = [Button(None, "RUN", 50, 570, color=GREEN), Button(None, "CLEAR", 50, 690, offset=-35, color=YELLOW), Button(None, "RESET", 50, 810, offset=-25,
+                                                                                                                                 color=RED)]
     finished = False
     selected_algorithm = None
     while True:
@@ -204,6 +214,10 @@ def main():
                                         return 0
                                     else:
                                         draw_path(grid, path, start, end)
+                            elif button.text == "CLEAR":
+                                grid, start, end = clear(grid, start, end)
+                                finished = False
+                                draw_grid(grid)
 
             if pygame.mouse.get_pressed()[2]:
                 pos = pygame.mouse.get_pos()
@@ -301,7 +315,24 @@ def get_grid_pos(pos):
     return row, col
 
 
-# <<< Remove target from parameters when buttons done >>>
+def clear(grid, start=None, end=None):
+    for row in range(GRID_SIZE):
+        for col in range(GRID_SIZE):
+            node = grid[row][col]
+            if node.is_barrier() or node.is_start() or node.is_end():
+                grid[row][col] = node.copy()
+            else:
+                grid[row][col] = GraphNode(row, col)
+    if start:
+        start = grid[start.row][start.col]
+        start.select_start()
+    if end:
+        end = grid[end.row][end.col]
+        end.select_end()
+
+    return grid, start, end
+
+
 def BFS(grid, start, end):
     path = [start]
     bfs_queue = deque([[start, path]])
