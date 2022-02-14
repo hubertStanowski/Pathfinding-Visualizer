@@ -143,7 +143,7 @@ class Button:
     def draw(self):
         pygame.draw.rect(WINDOW, self.color, self.rect)
         font = pygame.font.SysFont(FONT, 60)
-        label = font.render(self.text, 30, BLACK)
+        label = font.render(self.text, True, BLACK)
         text_rect = pygame.Rect(
             self.x + 60 + self.offset, self.y + 15, BUTTON_WIDTH, BUTTON_HEIGHT)
         WINDOW.blit(label, text_rect)
@@ -210,8 +210,15 @@ def main():
 
                                     finished = True
                                     if not path:
+                                        font = pygame.font.SysFont(FONT, 150)
+                                        label = font.render(
+                                            "PATH NOT FOUND!", True, RED)
+                                        text_rect = label.get_rect(
+                                            center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+                                        WINDOW.blit(label, text_rect)
+                                        pygame.display.update()
+                                        pygame.time.delay(1500)
                                         print("PATH NOT FOUND")
-                                        return 0
                                     else:
                                         draw_path(grid, path, start, end)
                             elif button.text == "CLEAR":
@@ -255,8 +262,15 @@ def main():
 
                     finished = True
                     if not path:
+                        font = pygame.font.SysFont(FONT, 150)
+                        label = font.render(
+                            "PATH NOT FOUND!", True, RED)
+                        text_rect = label.get_rect(
+                            center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+                        WINDOW.blit(label, text_rect)
+                        pygame.display.update()
+                        pygame.time.delay(1500)
                         print("PATH NOT FOUND")
-                        return 0
                     else:
                         draw_path(grid, path, start, end)
 
