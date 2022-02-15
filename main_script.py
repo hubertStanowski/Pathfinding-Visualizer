@@ -10,7 +10,7 @@ pygame.init()
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
 GRID_WIDTH, GRID_HEIGHT = 900, 900
 
-GRID_SIZE = 30
+GRID_SIZE = 50
 SQUARE_SIZE = GRID_WIDTH // GRID_SIZE
 SIDE_SIZE = (WINDOW_WIDTH - GRID_WIDTH) // 2
 TB_SIZE = (WINDOW_HEIGHT - GRID_HEIGHT) // 2  # Top and bottom tab size
@@ -186,6 +186,9 @@ def main():
 
                     for button in maze_buttons:
                         if button.rect.collidepoint(pos):
+                            grid, start, end = clear(
+                                grid, start, end, save_barriers=False)
+                            finished = False
                             grid = button.algorithm(grid)
 
                     for button in other_buttons:
@@ -215,9 +218,10 @@ def main():
                                         WINDOW.blit(label, text_rect)
                                         pygame.display.update()
                                         pygame.time.delay(1500)
+                                        finished = False
                                         print("PATH NOT FOUND")
                                     else:
-                                        draw_path(grid, path, start, end)
+                                        draw_path(grid, path)
                             elif button.text == "CLEAR":
                                 grid, start, end = clear(grid, start, end)
                                 finished = False
@@ -236,6 +240,7 @@ def main():
                     node.unselect()
 
 
+# TODO draw legend of node colors
 def draw(grid, algo_buttons=[], other_buttons=[], maze_buttons=[]):
     for button in (algo_buttons + other_buttons + maze_buttons):
         button.draw()
@@ -243,15 +248,15 @@ def draw(grid, algo_buttons=[], other_buttons=[], maze_buttons=[]):
     pygame.display.update()
 
 
-def draw_path(grid, path, start, end):
-    start.color = GREEN
-
+def draw_path(grid, path):
+    length = len(path)
     for node in path:
-        if node is not start and node is not end:
+        if not node.is_start() and not node.is_end():
             node.color = PATH_COLOR
-
-    end.color = RED
-
+            # If path is too long, skip the animation
+            if length < 200:
+                pygame.time.delay(round(25 * 20 // length))
+                draw(grid)
     draw(grid)
 
 
@@ -284,11 +289,11 @@ def get_grid_pos(pos):
     return row, col
 
 
-def clear(grid, start=None, end=None):
+def clear(grid, start=None, end=None, save_barriers=True):
     for row in range(GRID_SIZE):
         for col in range(GRID_SIZE):
             node = grid[row][col]
-            if node.is_barrier() or node.is_start() or node.is_end():
+            if (node.is_barrier() and save_barriers) or node.is_start() or node.is_end():
                 grid[row][col] = node.copy()
             else:
                 grid[row][col] = GraphNode(row, col)
@@ -302,6 +307,7 @@ def clear(grid, start=None, end=None):
     return grid, start, end
 
 
+# TODO button for saving the grid + saving grid size
 def save_grid(grid, start, end):
     grid, start, end = clear(grid, start, end)
     now = datetime.now()
@@ -324,6 +330,7 @@ def save_grid(grid, start, end):
     print("Saved the grid")
 
 
+# TODO error message if grid size not matching
 def read_grid(input):
     with open(input, "r") as file:
         grid = []
@@ -430,6 +437,8 @@ def astar(grid, start, end):
                 temp = parents[temp]
                 path.append(temp)
 
+            path.reverse()
+
             return path
 
         draw(grid)
@@ -461,9 +470,8 @@ def h_euclidean(pos1, pos2):
 
     return h
 
+
 # random 1/3 maze generator
-
-
 def random_maze(grid):
     for row in range(GRID_SIZE):
         for col in range(GRID_SIZE):
@@ -473,6 +481,8 @@ def random_maze(grid):
                     node.select_barrier()
 
     return grid
+
+# TODO recursive division maze generator
 
 
 if __name__ == "__main__":
