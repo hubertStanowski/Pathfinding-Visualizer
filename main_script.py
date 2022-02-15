@@ -119,16 +119,6 @@ class GraphNode:
 
         return self.source_dist < other.source_dist
 
-    # DEBUGGING TOOL
-    def select_neighbors(self, grid):
-        self.reset_neighbors(grid)
-        print(f"<<< ({self.row}, {self.col}) >>>")
-        for neighbor in self.neighbors:
-            neighbor.color = VISITED_COLOR
-            print((neighbor.row, neighbor.col))
-
-        draw(grid)
-
 
 class Button:
     def __init__(self, algorithm, text, x, y, offset=0, color=WHITE):
@@ -153,12 +143,12 @@ def main():
     grid = [[GraphNode(row, col) for col in range(GRID_SIZE)]
             for row in range(GRID_SIZE)]
     start, end = None, None
+    finished = False
+    selected_algorithm = None
     algo_buttons = [Button(BFS, "BFS", 50, 50), Button(DFS, "DFS", 50, 170),
                     Button(dijkstras, "Dijkstra's", 50, 290, offset=-54), Button(astar, "A*", 50, 410, offset=20)]
     other_buttons = [Button(None, "RUN", 50, 570, color=GREEN), Button(None, "CLEAR", 50, 690, offset=-35, color=YELLOW), Button(None, "RESET", 50, 810, offset=-25,
                                                                                                                                  color=RED)]
-    finished = False
-    selected_algorithm = None
     while True:
         WINDOW.fill(BLACK)
         draw(grid, algo_buttons, other_buttons)
@@ -210,7 +200,7 @@ def main():
 
                                     finished = True
                                     if not path:
-                                        font = pygame.font.SysFont(FONT, 150)
+                                        font = pygame.font.SysFont(FONT, 120)
                                         label = font.render(
                                             "PATH NOT FOUND!", True, RED)
                                         text_rect = label.get_rect(
@@ -238,47 +228,8 @@ def main():
 
                     node.unselect()
 
-            if pygame.mouse.get_pressed()[1]:
-                pos = pygame.mouse.get_pos()
-                print("################")
-                print(pos)
-                row, col = get_grid_pos(pos)
-                print((row, col))
-                print("################")
-                if row < GRID_SIZE and row >= 0 and col < GRID_SIZE and col >= 0:
-                    node = grid[row][col]
-                    node.select_neighbors(grid)
-
-            # Left in case sb prefers to use keyboard over buttons
             if event.type == pygame.KEYDOWN:
-                if event.key in [pygame.K_RETURN, pygame.K_SPACE] and start and end and not finished and selected_algorithm:
-                    # Run selected algorithm
-                    for row in range(GRID_SIZE):
-                        for col in range(GRID_SIZE):
-                            current = grid[row][col]
-                            current.reset_neighbors(grid)
-
-                    path = selected_algorithm(grid, start, end)
-
-                    finished = True
-                    if not path:
-                        font = pygame.font.SysFont(FONT, 150)
-                        label = font.render(
-                            "PATH NOT FOUND!", True, RED)
-                        text_rect = label.get_rect(
-                            center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-                        WINDOW.blit(label, text_rect)
-                        pygame.display.update()
-                        pygame.time.delay(1500)
-                        print("PATH NOT FOUND")
-                    else:
-                        draw_path(grid, path, start, end)
-
-                if event.key in [pygame.K_BACKSPACE, pygame.K_ESCAPE]:
-                    grid = [[GraphNode(row, col) for col in range(GRID_SIZE)]
-                            for row in range(GRID_SIZE)]
-                    start, end = None, None
-                    finished = False
+                pass
 
 
 def draw(grid, algo_buttons=[], other_buttons=[]):
@@ -346,6 +297,8 @@ def clear(grid, start=None, end=None):
 
     return grid, start, end
 
+# End parameter left for simplicity when calling selected_algorithm
+
 
 def BFS(grid, start, end):
     path = [start]
@@ -364,6 +317,7 @@ def BFS(grid, start, end):
                     bfs_queue.append([neighbor, path + [neighbor]])
 
 
+# End parameter left for simplicity when calling selected_algorithm
 def DFS(grid, current, end, visited=None):
     # List for recreating the path
     if visited == None:
