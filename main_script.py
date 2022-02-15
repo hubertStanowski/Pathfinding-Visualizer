@@ -4,6 +4,7 @@ from math import inf, sqrt
 from heapq import heappop, heappush
 from queue import PriorityQueue
 from datetime import datetime
+import random
 pygame.init()
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
@@ -33,7 +34,6 @@ PATH_COLOR = (186, 85, 211)
 VISITED_COLOR = BLUE
 START_COLOR = GREEN
 END_COLOR = RED
-BUTTON_COLOR = PATH_COLOR
 
 WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Pathfinding Algorithms Visualizer")
@@ -148,11 +148,13 @@ def main():
     selected_algorithm = None
     algo_buttons = [Button(BFS, "BFS", 50, 50), Button(DFS, "DFS", 50, 170),
                     Button(dijkstras, "Dijkstra's", 50, 290, offset=-54), Button(astar, "A*", 50, 410, offset=20)]
+    maze_buttons = [Button(random_maze, "Random",
+                           WINDOW_WIDTH - (BUTTON_WIDTH + 50), 50, offset=-50, color=(127, 255, 148))]
     other_buttons = [Button(None, "RUN", 50, 570, color=GREEN), Button(None, "CLEAR", 50, 690, offset=-35, color=YELLOW), Button(None, "RESET", 50, 810, offset=-25,
                                                                                                                                  color=RED)]
     while True:
         WINDOW.fill(BLACK)
-        draw(grid, algo_buttons, other_buttons)
+        draw(grid, algo_buttons, other_buttons, maze_buttons)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return 0
@@ -175,13 +177,17 @@ def main():
                 else:
                     for button in algo_buttons:
                         if button.rect.collidepoint(pos):
-                            button.color = BUTTON_COLOR
+                            button.color = (186, 85, 211)
                             selected_algorithm = button.algorithm
-                            button.draw()
                             for other in algo_buttons:
                                 if other is not button:
                                     other.color = WHITE
                                     other.draw()
+
+                    for button in maze_buttons:
+                        if button.rect.collidepoint(pos):
+                            grid = button.algorithm(grid)
+
                     for button in other_buttons:
                         if button.rect.collidepoint(pos):
                             if button.text == "RESET":
@@ -230,8 +236,8 @@ def main():
                     node.unselect()
 
 
-def draw(grid, algo_buttons=[], other_buttons=[]):
-    for button in (algo_buttons + other_buttons):
+def draw(grid, algo_buttons=[], other_buttons=[], maze_buttons=[]):
+    for button in (algo_buttons + other_buttons + maze_buttons):
         button.draw()
     draw_grid(grid)
     pygame.display.update()
@@ -454,6 +460,19 @@ def h_euclidean(pos1, pos2):
     h = sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
     return h
+
+# random 1/3 maze generator
+
+
+def random_maze(grid):
+    for row in range(GRID_SIZE):
+        for col in range(GRID_SIZE):
+            node = grid[row][col]
+            if node.is_free():
+                if random.choice([True, False, False]):
+                    node.select_barrier()
+
+    return grid
 
 
 if __name__ == "__main__":
