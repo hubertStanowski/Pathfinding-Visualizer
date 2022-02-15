@@ -3,6 +3,7 @@ from collections import deque
 from math import inf, sqrt
 from heapq import heappop, heappush
 from queue import PriorityQueue
+from datetime import datetime
 pygame.init()
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
@@ -228,9 +229,6 @@ def main():
 
                     node.unselect()
 
-            if event.type == pygame.KEYDOWN:
-                pass
-
 
 def draw(grid, algo_buttons=[], other_buttons=[]):
     for button in (algo_buttons + other_buttons):
@@ -297,9 +295,57 @@ def clear(grid, start=None, end=None):
 
     return grid, start, end
 
+
+def save_grid(grid, start, end):
+    grid, start, end = clear(grid, start, end)
+    now = datetime.now()
+    with open(f"saved_grid_{now.day}_{now.month}_{now.hour}_{now.minute}.txt", "w") as file:
+        for row in range(GRID_SIZE):
+            line = []
+            for col in range(GRID_SIZE):
+                node = grid[row][col]
+                if node.is_barrier():
+                    line.append("B")
+                elif node.is_start():
+                    line.append("S")
+                elif node.is_end():
+                    line.append("E")
+                else:
+                    line.append("F")
+            file.write(str(line)[1:-1])
+            file.write("\n")
+
+    print("Saved the grid")
+
+
+def read_grid(input):
+    with open(input, "r") as file:
+        grid = []
+        start, end = None, None
+        for line in file:
+            line = line.replace("\n", "")
+            row = line.split(", ")
+            grid.append(row)
+
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                # removing the parentheses left from saving the grid ([1])
+                id = grid[row][col][1]
+                node = GraphNode(row, col)
+                if id == "B":
+                    node.select_barrier()
+                elif id == "S":
+                    node.select_start()
+                    start = node
+                elif id == "E":
+                    node.select_end()
+                    end = node
+                grid[row][col] = node
+
+        return grid, start, end
+
+
 # End parameter left for simplicity when calling selected_algorithm
-
-
 def BFS(grid, start, end):
     path = [start]
     bfs_queue = deque([[start, path]])
@@ -362,7 +408,7 @@ def astar(grid, start, end):
     open_pqueue.put(start)
     parents = {}
     start.source_dist = 0
-    # refactor into get_pos?
+    # TODO refactor into get_pos
     start.source_dist = h((start.row, start.col), (end.row, end.col))
     open_set = set([start])
 
