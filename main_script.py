@@ -35,6 +35,7 @@ PATH_COLOR = (186, 85, 211)
 VISITED_COLOR = BLUE
 START_COLOR = GREEN
 END_COLOR = RED
+LINE_COLOR = GRAY
 
 WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Pathfinding Algorithms Visualizer")
@@ -150,7 +151,7 @@ def main():
     algo_buttons = [Button(BFS, "BFS", 50, 50), Button(DFS, "DFS", 50, 170),
                     Button(dijkstras, "Dijkstra's", 50, 290, offset=-54), Button(astar, "A*", 50, 410, offset=20)]
     maze_buttons = [Button(random_maze, "Random",
-                           WINDOW_WIDTH - (BUTTON_WIDTH + 50), 50, offset=-45, color=(127, 255, 148))]
+                           WINDOW_WIDTH - (BUTTON_WIDTH + 50), 500, offset=-45, color=(127, 255, 148)), Button(None, "Division", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 620, offset=-45, color=(127, 255, 148))]
     other_buttons = [Button(None, "RUN", 50, 570, offset=-5, color=GREEN), Button(None, "CLEAR", 50, 690, offset=-35, color=YELLOW), Button(None, "RESET", 50, 810, offset=-25,
                                                                                                                                             color=RED), Button(None, "SAVE", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 810, offset=-15, color=BLUE)]
     if len(sys.argv) == 2:
@@ -245,15 +246,18 @@ def main():
                         start = None
                     elif node.is_end():
                         end = None
-
                     node.unselect()
+            elif pygame.mouse.get_pressed()[1]:
+                pos = pygame.mouse.get_pos()
+                print(pos)
 
 
-# TODO draw a legend of node colors
 def draw(grid, algo_buttons=[], other_buttons=[], maze_buttons=[]):
+    WINDOW.fill(BLACK)
     for button in (algo_buttons + other_buttons + maze_buttons):
         button.draw()
     draw_grid(grid)
+    draw_legend()
     pygame.display.update()
 
 
@@ -265,8 +269,8 @@ def draw_path(grid, path):
             # If path is too long, skip the animation
             if length < 200:
                 pygame.time.delay(round(25 * 20 // length))
-                draw(grid)
-    draw(grid)
+                draw_grid(grid)
+    draw_grid(grid)
 
 
 def draw_grid(grid):
@@ -277,17 +281,45 @@ def draw_grid(grid):
                              (node.x, node.y, SQUARE_SIZE, SQUARE_SIZE))
 
     # Draw lines
-    line_color = GRAY
     x, y = SIDE_SIZE, TB_SIZE
     width, height = GRID_WIDTH, GRID_HEIGHT
 
     for i in range(GRID_SIZE + 1):
-        pygame.draw.line(WINDOW, line_color, (x, y + i *
+        pygame.draw.line(WINDOW, LINE_COLOR, (x, y + i *
                          SQUARE_SIZE), (x + width, y + i * SQUARE_SIZE))
 
         for j in range(GRID_SIZE + 1):
-            pygame.draw.line(WINDOW, line_color, (x + j *
+            pygame.draw.line(WINDOW, LINE_COLOR, (x + j *
                              SQUARE_SIZE, y), (x + j * SQUARE_SIZE, y + height))
+
+    pygame.display.update()
+
+
+def draw_legend():
+    draw_legend_node("Start node", START_COLOR,  offset=0)
+    draw_legend_node("End node", END_COLOR,  offset=50)
+    draw_legend_node("Free node", FREE_COLOR,  offset=100)
+    draw_legend_node("Barrier node", BARRIER_COLOR, offset=150)
+    draw_legend_node("Visited node", VISITED_COLOR,  offset=200)
+    draw_legend_node("Path node", PATH_COLOR,  offset=250)
+    draw_legend_node("Select a node",  offset=300, action="LMB")
+    draw_legend_node("Unselect a node",  offset=350, action="RMB")
+
+
+def draw_legend_node(text, color=None, offset=0, action=""):
+    x, y = SIDE_SIZE + GRID_WIDTH + 30, TB_SIZE + offset
+
+    font = pygame.font.SysFont(FONT, 30)
+    label = font.render(action + " - " + text, True, WHITE)
+    text_rect = pygame.Rect(x + 30, y + 5, 100, 50)
+    if action != "":
+        text_rect = pygame.Rect(x, y + 5, 100, 50)
+
+    if color:
+        pygame.draw.rect(WINDOW, color, (x, y, 30, 30))
+        pygame.draw.rect(WINDOW, LINE_COLOR, (x, y, 30, 30), 1)
+
+    WINDOW.blit(label, text_rect)
 
 
 def get_grid_pos(pos):
@@ -376,7 +408,7 @@ def BFS(grid, start, end):
     while bfs_queue:
         current, path = bfs_queue.popleft()
 
-        draw(grid)
+        draw_grid(grid)
         for neighbor in current.neighbors:
             if not neighbor.been_visited():
                 if neighbor.is_end():
@@ -398,7 +430,7 @@ def DFS(grid, current, end, visited=None):
     if current.is_end():
         return visited
 
-    draw(grid)
+    draw_grid(grid)
     for neighbor in current.neighbors:
         if not neighbor.been_visited():
             path = DFS(grid, neighbor, end, visited)
@@ -414,7 +446,7 @@ def dijkstras(grid, start, end):
         current = heappop(to_visit)
         current.set_visited()
 
-        draw(grid)
+        draw_grid(grid)
         for neighbor in current.neighbors:
             new_dist = current.source_dist + 1
             new_path = current.path + [current]
@@ -450,7 +482,7 @@ def astar(grid, start, end):
 
             return path
 
-        draw(grid)
+        draw_grid(grid)
         for neighbor in current.neighbors:
             new_g_score = current.source_dist + 1
             if new_g_score < neighbor.source_dist:
