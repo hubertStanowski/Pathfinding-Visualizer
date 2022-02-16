@@ -5,6 +5,7 @@ from heapq import heappop, heappush
 from queue import PriorityQueue
 from datetime import datetime
 import random
+import sys
 pygame.init()
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
@@ -53,7 +54,7 @@ class GraphNode:
         self.path = []
 
     def pos(self):
-        return self.x, self.y
+        return self.row, self.col
 
     def select_start(self):
         self.color = START_COLOR
@@ -149,9 +150,15 @@ def main():
     algo_buttons = [Button(BFS, "BFS", 50, 50), Button(DFS, "DFS", 50, 170),
                     Button(dijkstras, "Dijkstra's", 50, 290, offset=-54), Button(astar, "A*", 50, 410, offset=20)]
     maze_buttons = [Button(random_maze, "Random",
-                           WINDOW_WIDTH - (BUTTON_WIDTH + 50), 50, offset=-50, color=(127, 255, 148))]
-    other_buttons = [Button(None, "RUN", 50, 570, color=GREEN), Button(None, "CLEAR", 50, 690, offset=-35, color=YELLOW), Button(None, "RESET", 50, 810, offset=-25,
-                                                                                                                                 color=RED)]
+                           WINDOW_WIDTH - (BUTTON_WIDTH + 50), 50, offset=-45, color=(127, 255, 148))]
+    other_buttons = [Button(None, "RUN", 50, 570, offset=-5, color=GREEN), Button(None, "CLEAR", 50, 690, offset=-35, color=YELLOW), Button(None, "RESET", 50, 810, offset=-25,
+                                                                                                                                            color=RED), Button(None, "SAVE", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 810, offset=-15, color=BLUE)]
+    if len(sys.argv) == 2:
+        try:
+            grid, start, end = load_grid(sys.argv[1])
+        except FileNotFoundError:
+            print("Entered a wrong file path!")
+
     while True:
         WINDOW.fill(BLACK)
         draw(grid, algo_buttons, other_buttons, maze_buttons)
@@ -189,7 +196,8 @@ def main():
                             grid, start, end = clear(
                                 grid, start, end, save_barriers=False)
                             finished = False
-                            grid = button.algorithm(grid)
+                            if button.text == "Random":
+                                grid = button.algorithm(grid)
 
                     for button in other_buttons:
                         if button.rect.collidepoint(pos):
@@ -226,7 +234,8 @@ def main():
                                 grid, start, end = clear(grid, start, end)
                                 finished = False
                                 draw_grid(grid)
-
+                            elif button.text == "SAVE":
+                                save_grid(grid, start, end)
             if pygame.mouse.get_pressed()[2]:
                 pos = pygame.mouse.get_pos()
                 row, col = get_grid_pos(pos)
@@ -240,7 +249,7 @@ def main():
                     node.unselect()
 
 
-# TODO draw legend of node colors
+# TODO draw a legend of node colors
 def draw(grid, algo_buttons=[], other_buttons=[], maze_buttons=[]):
     for button in (algo_buttons + other_buttons + maze_buttons):
         button.draw()
@@ -307,7 +316,6 @@ def clear(grid, start=None, end=None, save_barriers=True):
     return grid, start, end
 
 
-# TODO button for saving the grid + saving grid size
 def save_grid(grid, start, end):
     grid, start, end = clear(grid, start, end)
     now = datetime.now()
@@ -327,11 +335,10 @@ def save_grid(grid, start, end):
             file.write(str(line)[1:-1])
             file.write("\n")
 
-    print("Saved the grid")
+    print("Saved the grid!")
 
 
-# TODO error message if grid size not matching
-def read_grid(input):
+def load_grid(input):
     with open(input, "r") as file:
         grid = []
         start, end = None, None
@@ -339,6 +346,9 @@ def read_grid(input):
             line = line.replace("\n", "")
             row = line.split(", ")
             grid.append(row)
+
+        if len(grid) != GRID_SIZE:
+            raise Exception("File can't be loaded (wrong grid size)!")
 
         for row in range(GRID_SIZE):
             for col in range(GRID_SIZE):
@@ -421,8 +431,7 @@ def astar(grid, start, end):
     open_pqueue.put(start)
     parents = {}
     start.source_dist = 0
-    # TODO refactor into get_pos
-    start.source_dist = h((start.row, start.col), (end.row, end.col))
+    start.source_dist = h(start.pos(), end.pos())
     open_set = set([start])
 
     while not open_pqueue.empty():
@@ -448,7 +457,7 @@ def astar(grid, start, end):
                 parents[neighbor] = current
                 neighbor.source_dist = new_g_score
                 neighbor.target_dist = new_g_score + \
-                    h((neighbor.row, neighbor.col), (end.row, end.col))
+                    h(neighbor.pos(), end.pos())
                 if neighbor not in open_set:
                     open_pqueue.put(neighbor)
                     open_set.add(neighbor)
@@ -481,8 +490,6 @@ def random_maze(grid):
                     node.select_barrier()
 
     return grid
-
-# TODO recursive division maze generator
 
 
 if __name__ == "__main__":
