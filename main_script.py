@@ -1,17 +1,19 @@
 import pygame
 from collections import deque
-from math import inf, sqrt
+from math import floor, inf, sqrt
 from heapq import heappop, heappush
 from queue import PriorityQueue
 from datetime import datetime
-import random
+from random import randrange, choice
 import sys
 pygame.init()
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
 GRID_WIDTH, GRID_HEIGHT = 900, 900
 
-GRID_SIZE = 50
+# TODO Add buttons for choosing grid size SMALL - 25, MEDIUM - 45, LARGE - 75
+# TODO Add warning that large size may cause lag
+GRID_SIZE = 45
 SQUARE_SIZE = GRID_WIDTH // GRID_SIZE
 SIDE_SIZE = (WINDOW_WIDTH - GRID_WIDTH) // 2
 TB_SIZE = (WINDOW_HEIGHT - GRID_HEIGHT) // 2  # Top and bottom tab size
@@ -151,7 +153,7 @@ def main():
     algo_buttons = [Button(BFS, "BFS", 50, 50), Button(DFS, "DFS", 50, 170),
                     Button(dijkstras, "Dijkstra's", 50, 290, offset=-54), Button(astar, "A*", 50, 410, offset=20)]
     maze_buttons = [Button(random_maze, "Random",
-                           WINDOW_WIDTH - (BUTTON_WIDTH + 50), 500, offset=-45, color=(127, 255, 148)), Button(None, "Division", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 620, offset=-45, color=(127, 255, 148))]
+                           WINDOW_WIDTH - (BUTTON_WIDTH + 50), 500, offset=-45, color=(127, 255, 148)), Button(divide, "Division", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 620, offset=-45, color=(127, 255, 148))]
     other_buttons = [Button(None, "RUN", 50, 570, offset=-5, color=GREEN), Button(None, "CLEAR", 50, 690, offset=-35, color=YELLOW), Button(None, "RESET", 50, 810, offset=-25,
                                                                                                                                             color=RED), Button(None, "SAVE", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 810, offset=-15, color=BLUE)]
     if len(sys.argv) == 2:
@@ -199,6 +201,10 @@ def main():
                             finished = False
                             if button.text == "Random":
                                 grid = button.algorithm(grid)
+                            elif button.text == "Division":
+                                add_border(grid)
+                                button.algorithm(
+                                    grid, 1, GRID_SIZE - 2, 1, GRID_SIZE-2)
 
                     for button in other_buttons:
                         if button.rect.collidepoint(pos):
@@ -256,8 +262,9 @@ def draw(grid, algo_buttons=[], other_buttons=[], maze_buttons=[]):
     WINDOW.fill(BLACK)
     for button in (algo_buttons + other_buttons + maze_buttons):
         button.draw()
-    draw_grid(grid)
     draw_legend()
+    draw_grid(grid)
+
     pygame.display.update()
 
 
@@ -518,10 +525,74 @@ def random_maze(grid):
         for col in range(GRID_SIZE):
             node = grid[row][col]
             if node.is_free():
-                if random.choice([True, False, False]):
+                if choice([True, False, False]):
                     node.select_barrier()
 
     return grid
+
+
+# TODO reset grid functioon for RESET button and before divide
+# Recursive division maze generator
+def divide(grid, min_x, max_x, min_y,  max_y):
+    width, height = max_x - min_x, max_y - min_y
+    horizontal = choose_orientation(width, height)
+
+    if horizontal:
+        if width < 2:
+            return
+
+        # Randomly generate a wall
+        y = floor(randrange(min_y, max_y) / 2) * 2
+
+        # Randomly generate a hole
+        hole = floor(randrange(min_x, max_x) / 2) * 2 + 1
+
+        # Draw the wall with the hole
+        for x in range(min_x, max_x+1):
+            if x != hole:
+                grid[x][y].select_barrier()
+
+        # Recursive calls
+        divide(grid, min_x, max_x, min_y, y-1)
+        divide(grid, min_x, max_x, y+1, max_y)
+    else:
+        if height < 2:
+            return
+
+        # Randomly generate a wall
+        x = floor(randrange(min_x, max_x) / 2) * 2
+
+        # Randomly generate a hole
+        hole = floor(randrange(min_y, max_y) / 2) * 2 + 1
+
+        # Draw the wall with the hole
+        for y in range(min_y, max_y+1):
+            if y != hole:
+                grid[x][y].select_barrier()
+
+        # Recursive calls
+        divide(grid, min_x, x-1, min_y, max_y)
+        divide(grid, x+1, max_x, min_y, max_y)
+
+
+def choose_orientation(width, height):
+    # True for horizontal, False for vertical
+    if width < height:
+        return True
+    elif width > height:
+        return False
+    else:
+        return choice([True, False])
+
+
+def add_border(grid):
+    for i in range(GRID_SIZE):
+        grid[0][i].select_barrier()
+        grid[GRID_SIZE-1][i].select_barrier()
+        grid[i][0].select_barrier()
+        grid[i][GRID_SIZE-1].select_barrier()
+
+    draw_grid(grid)
 
 
 if __name__ == "__main__":
