@@ -5,18 +5,22 @@ from heapq import heappop, heappush
 from queue import PriorityQueue
 from datetime import datetime
 from random import randrange, choice, shuffle
-import sys
 pygame.init()
+
+
+# TODO change save button to toggling lines on / off  + remove saving/loading using files
+# TODO refactoring
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
 GRID_WIDTH, GRID_HEIGHT = 900, 900
 
 
-GRID_SIZE = 45
+GRID_SIZE = 45  # Best change to divisors of 900
 SQUARE_SIZE = GRID_WIDTH // GRID_SIZE
 SIDE_SIZE = (WINDOW_WIDTH - GRID_WIDTH) // 2
 TB_SIZE = (WINDOW_HEIGHT - GRID_HEIGHT) // 2  # Top and bottom tab size
 BUTTON_WIDTH, BUTTON_HEIGHT = (SIDE_SIZE - 100) + 5, 70
+LINES = True
 
 
 WHITE = (255, 255, 255)
@@ -51,6 +55,7 @@ class GraphNode:
         self.col = col
         self.color = FREE_COLOR
         self.neighbors = []
+        self.barriers = []
         self.visited = False
         self.source_dist = inf  # g score in a*
         self.target_dist = inf  # f score in a*
@@ -59,16 +64,16 @@ class GraphNode:
     def pos(self):
         return self.row, self.col
 
-    def select_start(self):
+    def set_start(self):
         self.color = START_COLOR
 
-    def unselect(self):
+    def set_free(self):
         self.color = FREE_COLOR
 
-    def select_end(self):
+    def set_end(self):
         self.color = END_COLOR
 
-    def select_barrier(self):
+    def set_barrier(self):
         if self.is_free():
             self.color = BARRIER_COLOR
 
@@ -101,23 +106,38 @@ class GraphNode:
 
         return new
 
-    def reset_neighbors(self, grid):
+    def get_neighbors(self, grid):
         self.neighbors = []
+        self.barriers = []
 
         # DOWN
-        if self.col + 1 < GRID_SIZE and grid[self.row][self.col+1].not_barrier():
-            self.neighbors.append(grid[self.row][self.col+1])
+        if self.col + 1 < GRID_SIZE:
+            if grid[self.row][self.col+1].not_barrier():
+                self.neighbors.append(grid[self.row][self.col+1])
+            else:
+                self.barriers.append(grid[self.row][self.col+1])
 
         # RIGHT
-        if self.row + 1 < GRID_SIZE and grid[self.row+1][self.col].not_barrier():
-            self.neighbors.append(grid[self.row+1][self.col])
+        if self.row + 1 < GRID_SIZE:
+            if grid[self.row+1][self.col].not_barrier():
+                self.neighbors.append(grid[self.row+1][self.col])
+            else:
+                self.barriers.append(grid[self.row+1][self.col])
 
         # UP
-        if self.col > 0 and grid[self.row][self.col-1].not_barrier():
-            self.neighbors.append(grid[self.row][self.col-1])
+        if self.col > 0:
+            if grid[self.row][self.col-1].not_barrier():
+                self.neighbors.append(grid[self.row][self.col-1])
+            else:
+                self.barriers.append(grid[self.row][self.col-1])
         # LEFT
-        if self.row > 0 and grid[self.row-1][self.col].not_barrier():
-            self.neighbors.append(grid[self.row-1][self.col])
+        if self.row > 0:
+            if grid[self.row-1][self.col].not_barrier():
+                self.neighbors.append(grid[self.row-1][self.col])
+            else:
+                self.barriers.append(grid[self.row-1][self.col])
+
+        return self.neighbors + self.barriers
 
     def __lt__(self, other):
         if self.target_dist is not inf:
@@ -177,11 +197,15 @@ def main():
                            TB_SIZE + diff*2, offset=-51),
                     Button(astar, "A*", 50, TB_SIZE + diff*3, offset=20)]
 
-    maze_buttons = [Button(random_maze, "Random", 50, TB_SIZE + diff*4, offset=-43, color=(127, 255, 148)),
+    maze_buttons = [Button(prims, "Prim's", 50, TB_SIZE + diff*4,
+                           offset=-20, color=(127, 255, 148)),
                     Button(divide, "Division", 50,
                            TB_SIZE + diff*5, offset=-43, color=(127, 255, 148)),
                     Button(backtrack, "Backtrack", 50, TB_SIZE + diff*6,
-                           offset=-60, color=(127, 255, 148))]
+                           offset=-60, color=(127, 255, 148)),
+                    Button(random_maze, "Random", 50, TB_SIZE +
+                           diff*7, offset=-43, color=(127, 255, 148))
+                    ]
 
     other_buttons = [Button(None, "RUN", WINDOW_WIDTH -
                             (BUTTON_WIDTH + 50), TB_SIZE + 450, offset=-2, color=GREEN),
@@ -189,19 +213,13 @@ def main():
                             (BUTTON_WIDTH + 50), TB_SIZE + 570, offset=-31, color=YELLOW),
                      Button(None, "RESET", WINDOW_WIDTH -
                             (BUTTON_WIDTH + 50), TB_SIZE + 690, offset=-24, color=RED),
-                     Button(None, "SAVE", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), TB_SIZE + 810, offset=-10, color=BLUE)]  # 950 ;BH 70
+                     Button(None, "LINES", WINDOW_WIDTH -
+                            (BUTTON_WIDTH + 50), TB_SIZE + 810, offset=-24, color=BLUE)]
 
     size_buttons = [SmallButton("S", SIDE_SIZE + GRID_WIDTH + 70, TB_SIZE + 375, offset=-1),
                     SmallButton("M", SIDE_SIZE + GRID_WIDTH + 130,
                                 TB_SIZE + 375, offset=-4, color=PATH_COLOR),
                     SmallButton("L", SIDE_SIZE + GRID_WIDTH + 190, TB_SIZE + 375)]
-
-    if len(sys.argv) == 2:
-        try:
-            grid, start, end = load_grid(sys.argv[1])
-        except FileNotFoundError:
-            print("Entered a wrong file path!")
 
     while True:
         WINDOW.fill(BLACK)
@@ -217,13 +235,13 @@ def main():
                 if row < GRID_SIZE and row >= 0 and col < GRID_SIZE and col >= 0:
                     node = grid[row][col]
                     if start is None:
-                        node.select_start()
+                        node.set_start()
                         start = node
                     elif end is None and not node.is_start():
-                        node.select_end()
+                        node.set_end()
                         end = node
                     else:
-                        node.select_barrier()
+                        node.set_barrier()
                 else:
                     for button in algo_buttons:
                         if button.rect.collidepoint(pos):
@@ -246,10 +264,11 @@ def main():
                                     grid, 1, GRID_SIZE - 2, 1, GRID_SIZE-2)
                                 add_border(grid)
                             elif button.text == "Backtrack":
-                                for row in grid:
-                                    for node in row:
-                                        node.select_barrier()
+                                fill_grid(grid)
                                 button.algorithm(grid, 1, 1)
+                            elif button.text == "Prim's":
+                                fill_grid(grid)
+                                prims(grid)
 
                     for button in size_buttons:
                         if button.rect.collidepoint(pos):
@@ -285,7 +304,7 @@ def main():
                                     for row in range(GRID_SIZE):
                                         for col in range(GRID_SIZE):
                                             current = grid[row][col]
-                                            current.reset_neighbors(grid)
+                                            current.get_neighbors(grid)
 
                                     path = selected_algorithm(grid, start, end)
 
@@ -307,8 +326,8 @@ def main():
                                 grid, start, end = clear(grid, start, end)
                                 finished = False
                                 draw_grid(grid)
-                            elif button.text == "SAVE":
-                                save_grid(grid, start, end)
+                            elif button.text == "LINES":
+                                pass  # TODO implement toggling lines
 
             if pygame.mouse.get_pressed()[2]:
                 pos = pygame.mouse.get_pos()
@@ -319,7 +338,7 @@ def main():
                         start = None
                     elif node.is_end():
                         end = None
-                    node.unselect()
+                    node.set_free()
             elif pygame.mouse.get_pressed()[1]:
                 pos = pygame.mouse.get_pos()
                 print(pos)
@@ -377,7 +396,7 @@ def draw_legend():
     draw_legend_node("Visited node", VISITED_COLOR,  offset=200)
     draw_legend_node("Path node", PATH_COLOR,  offset=250)
     draw_legend_node("Select a node",  offset=290, action="LMB")
-    draw_legend_node("Unselect a node",  offset=320, action="RMB")
+    draw_legend_node("set_free a node",  offset=320, action="RMB")
 
 
 def draw_legend_node(text, color=None, offset=0, action=""):
@@ -414,64 +433,12 @@ def clear(grid, start=None, end=None, save_barriers=True):
                 grid[row][col] = GraphNode(row, col)
     if start:
         start = grid[start.row][start.col]
-        start.select_start()
+        start.set_start()
     if end:
         end = grid[end.row][end.col]
-        end.select_end()
+        end.set_end()
 
     return grid, start, end
-
-
-def save_grid(grid, start, end):
-    grid, start, end = clear(grid, start, end)
-    now = datetime.now()
-    with open(f"saved_grid_{now.day}_{now.month}_{now.hour}_{now.minute}.txt", "w") as file:
-        for row in range(GRID_SIZE):
-            line = []
-            for col in range(GRID_SIZE):
-                node = grid[row][col]
-                if node.is_barrier():
-                    line.append("B")
-                elif node.is_start():
-                    line.append("S")
-                elif node.is_end():
-                    line.append("E")
-                else:
-                    line.append("F")
-            file.write(str(line)[1:-1])
-            file.write("\n")
-
-    print("Saved the grid!")
-
-
-def load_grid(input):
-    with open(input, "r") as file:
-        grid = []
-        start, end = None, None
-        for line in file:
-            line = line.replace("\n", "")
-            row = line.split(", ")
-            grid.append(row)
-
-        if len(grid) != GRID_SIZE:
-            raise Exception("File can't be loaded (wrong grid size)!")
-
-        for row in range(GRID_SIZE):
-            for col in range(GRID_SIZE):
-                # removing the parentheses left from saving the grid ([1])
-                id = grid[row][col][1]
-                node = GraphNode(row, col)
-                if id == "B":
-                    node.select_barrier()
-                elif id == "S":
-                    node.select_start()
-                    start = node
-                elif id == "E":
-                    node.select_end()
-                    end = node
-                grid[row][col] = node
-
-        return grid, start, end
 
 
 def create_grid():
@@ -479,6 +446,12 @@ def create_grid():
             for row in range(GRID_SIZE)]
 
     return grid
+
+
+def fill_grid(grid):
+    for row in grid:
+        for node in row:
+            node.set_barrier()
 
 
 # End parameter left for simplicity when calling selected_algorithm
@@ -599,7 +572,7 @@ def random_maze(grid):
         for col in range(GRID_SIZE):
             node = grid[row][col]
             if choice([True, False, False]):
-                node.select_barrier()
+                node.set_barrier()
 
     return grid
 
@@ -623,9 +596,9 @@ def divide(grid, min_x, max_x, min_y,  max_y):
         for x in range(min_x, max_x+1):
             node = grid[y][x]
             if x == hole and not node.is_start() and not node.is_end():
-                node.unselect()
+                node.set_free()
             else:
-                node.select_barrier()
+                node.set_barrier()
 
         # Recursive calls
         divide(grid, min_x, max_x, min_y, y-1)
@@ -644,9 +617,9 @@ def divide(grid, min_x, max_x, min_y,  max_y):
         for y in range(min_y, max_y+1):
             node = grid[y][x]
             if y == hole and not node.is_start() and not node.is_end():
-                node.unselect()
+                node.set_free()
             else:
-                node.select_barrier()
+                node.set_barrier()
 
         # Recursive calls
         divide(grid, min_x, x-1, min_y, max_y)
@@ -657,7 +630,7 @@ def divide(grid, min_x, max_x, min_y,  max_y):
 def backtrack(grid, row, col):
     node = grid[row][col]
     if not node.is_start() and not node.is_end():
-        node.unselect()
+        node.set_free()
     directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
     shuffle(directions)
 
@@ -672,15 +645,66 @@ def backtrack(grid, row, col):
                 if in_grid(r, c):
                     link = grid[r][c]
                     if not link.is_start() and not link.is_end():
-                        link.unselect()
+                        link.set_free()
 
                 backtrack(grid, current.row, current.col)
     return
 
 
-# Helper function for backtrack()
-def in_grid(row, col):
-    return row in range(1, GRID_SIZE-1) and col in range(1, GRID_SIZE-1)
+def prims(grid):
+    start = grid[randrange(GRID_SIZE)][randrange(GRID_SIZE)]
+    start.set_free()
+    frontiers = frontier_barriers(grid, start)
+
+    while len(frontiers) > 0:
+        current_barrier = choice(frontiers)
+        neighbors = frontier_free(grid, current_barrier)
+        current_neighbor = choice(neighbors)
+
+        # Creating a passage
+        mid_row, mid_col = (current_barrier.row + current_neighbor.row) // \
+            2, (current_barrier.col + current_neighbor.col) // 2
+        grid[mid_row][mid_col].set_free()
+        current_barrier.set_free()
+
+        frontiers += frontier_barriers(grid, current_barrier)
+        frontiers.remove(current_barrier)
+
+        # draw_grid(grid)
+        # pygame.time.delay(1000)
+
+
+# Helper function for prims()
+def frontier_barriers(grid, node):
+    barriers = []
+    row, col = node.pos()
+    possible_nodes = [(row-2, col), (row+2, col), (row, col-2), (row, col+2)]
+    for coords in possible_nodes:
+        if in_grid(*coords, offset=0):
+            node = grid[coords[0]][coords[1]]
+            if node.is_barrier():
+                barriers.append(node)
+
+    return barriers
+
+
+# Helper function for prims()
+def frontier_free(grid, node):
+    free = []
+    row, col = node.pos()
+    possible_nodes = [(row-2, col), (row+2, col), (row, col-2), (row, col+2)]
+    for coords in possible_nodes:
+        if in_grid(*coords, offset=0):
+            node = grid[coords[0]][coords[1]]
+            if node.not_barrier():
+                free.append(node)
+
+    return free
+
+
+# Helper function for backtrack() and prims()
+def in_grid(row, col, offset=1):
+    return row in range(offset, GRID_SIZE-offset) and col in range(offset, GRID_SIZE-offset)
 
 
 # Helper function for divide()
@@ -697,10 +721,10 @@ def choose_orientation(width, height):
 # Adds a border for each side of the grid
 def add_border(grid, depth=0):
     for i in range(GRID_SIZE):
-        grid[depth][i].select_barrier()
-        grid[GRID_SIZE-1-depth][i].select_barrier()
-        grid[i][depth].select_barrier()
-        grid[i][GRID_SIZE-1-depth].select_barrier()
+        grid[depth][i].set_barrier()
+        grid[GRID_SIZE-1-depth][i].set_barrier()
+        grid[i][depth].set_barrier()
+        grid[i][GRID_SIZE-1-depth].set_barrier()
 
     draw_grid(grid)
 
