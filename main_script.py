@@ -11,8 +11,7 @@ pygame.init()
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
 GRID_WIDTH, GRID_HEIGHT = 900, 900
 
-# TODO reset grid functioon for RESET button
-# TODO Add buttons for choosing grid size SMALL - 25, MEDIUM - 45, LARGE - 75
+
 GRID_SIZE = 45
 SQUARE_SIZE = GRID_WIDTH // GRID_SIZE
 SIDE_SIZE = (WINDOW_WIDTH - GRID_WIDTH) // 2
@@ -234,9 +233,9 @@ def main():
                             if button.text == "Random":
                                 grid = button.algorithm(grid)
                             elif button.text == "Division":
-                                add_border(grid)
                                 button.algorithm(
                                     grid, 1, GRID_SIZE - 2, 1, GRID_SIZE-2)
+                                add_border(grid)
 
                     for button in size_buttons:
                         if button.rect.collidepoint(pos):
@@ -526,7 +525,6 @@ def dijkstras(grid, start, end):
                 return end.path
 
 
-# TODO optimize parents ? by using row, col combination
 def astar(grid, start, end):
     open_pqueue = PriorityQueue()
     open_pqueue.put(start)
@@ -609,8 +607,11 @@ def divide(grid, min_x, max_x, min_y,  max_y):
 
         # Draw the wall with the hole
         for x in range(min_x, max_x+1):
-            if x != hole:
-                grid[y][x].select_barrier()
+            node = grid[y][x]
+            if x == hole and not node.is_start() and not node.is_end():
+                node.unselect()
+            else:
+                node.select_barrier()
 
         # Recursive calls
         divide(grid, min_x, max_x, min_y, y-1)
@@ -627,8 +628,11 @@ def divide(grid, min_x, max_x, min_y,  max_y):
 
         # Draw the wall with the hole
         for y in range(min_y, max_y+1):
-            if y != hole:
-                grid[y][x].select_barrier()
+            node = grid[y][x]
+            if y == hole and not node.is_start() and not node.is_end():
+                node.unselect()
+            else:
+                node.select_barrier()
 
         # Recursive calls
         divide(grid, min_x, x-1, min_y, max_y)
