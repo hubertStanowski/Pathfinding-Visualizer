@@ -11,8 +11,8 @@ pygame.init()
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
 GRID_WIDTH, GRID_HEIGHT = 900, 900
 
+# TODO reset grid functioon for RESET button
 # TODO Add buttons for choosing grid size SMALL - 25, MEDIUM - 45, LARGE - 75
-# TODO Add warning that large size may cause lag
 GRID_SIZE = 45
 SQUARE_SIZE = GRID_WIDTH // GRID_SIZE
 SIDE_SIZE = (WINDOW_WIDTH - GRID_WIDTH) // 2
@@ -69,7 +69,8 @@ class GraphNode:
         self.color = END_COLOR
 
     def select_barrier(self):
-        self.color = BARRIER_COLOR
+        if self.is_free():
+            self.color = BARRIER_COLOR
 
     def set_visited(self):
         self.visited = True
@@ -144,18 +145,50 @@ class Button:
         WINDOW.blit(label, text_rect)
 
 
+class SmallButton:
+    def __init__(self, text, x, y, offset=0, color=WHITE):
+        self.text = text
+        self.x = x
+        self.y = y
+        self.rect = pygame.Rect(x, y, 40, 40)
+        self.color = color
+        self.offset = offset
+
+    def draw(self):
+        pygame.draw.rect(WINDOW, self.color, self.rect)
+        font = pygame.font.SysFont(FONT, 45)
+        label = font.render(self.text, True, BLACK)
+        text_rect = pygame.Rect(
+            self.x + 11 + self.offset, self.y + 7, 40, 40)
+        WINDOW.blit(label, text_rect)
+
+
 def main():
-    grid = [[GraphNode(row, col) for col in range(GRID_SIZE)]
-            for row in range(GRID_SIZE)]
+    global GRID_SIZE, SQUARE_SIZE
+
+    grid = create_grid()
     start, end = None, None
     finished = False
     selected_algorithm = None
-    algo_buttons = [Button(BFS, "BFS", 50, 50), Button(DFS, "DFS", 50, 170),
-                    Button(dijkstras, "Dijkstra's", 50, 290, offset=-54), Button(astar, "A*", 50, 410, offset=20)]
-    maze_buttons = [Button(random_maze, "Random",
-                           WINDOW_WIDTH - (BUTTON_WIDTH + 50), 500, offset=-45, color=(127, 255, 148)), Button(divide, "Division", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 620, offset=-45, color=(127, 255, 148))]
-    other_buttons = [Button(None, "RUN", 50, 570, offset=-5, color=GREEN), Button(None, "CLEAR", 50, 690, offset=-35, color=YELLOW), Button(None, "RESET", 50, 810, offset=-25,
-                                                                                                                                            color=RED), Button(None, "SAVE", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 810, offset=-15, color=BLUE)]
+    algo_buttons = [Button(BFS, "BFS", 50, 50),
+                    Button(DFS, "DFS", 50, 170),
+                    Button(dijkstras, "Dijkstra's", 50, 290, offset=-54),
+                    Button(astar, "A*", 50, 410, offset=20)]
+
+    maze_buttons = [Button(random_maze, "Random", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 570, offset=-45, color=(127, 255, 148)),
+                    Button(divide, "Division", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 690, offset=-45, color=(127, 255, 148))]
+
+    other_buttons = [Button(None, "RUN", 50, 570, offset=-5, color=GREEN),
+                     Button(None, "CLEAR", 50, 690, offset=-35, color=YELLOW),
+                     Button(None, "RESET", 50, 810, offset=-25, color=RED),
+                     Button(None, "SAVE", WINDOW_WIDTH -
+                            (BUTTON_WIDTH + 50), 810, offset=-15, color=BLUE)]
+
+    size_buttons = [SmallButton("S", SIDE_SIZE + GRID_WIDTH + 70, TB_SIZE + 400, offset=-1),
+                    SmallButton("M", SIDE_SIZE + GRID_WIDTH + 130,
+                                TB_SIZE + 400, offset=-4, color=PATH_COLOR),
+                    SmallButton("L", SIDE_SIZE + GRID_WIDTH + 190, TB_SIZE + 400)]
+
     if len(sys.argv) == 2:
         try:
             grid, start, end = load_grid(sys.argv[1])
@@ -164,7 +197,7 @@ def main():
 
     while True:
         WINDOW.fill(BLACK)
-        draw(grid, algo_buttons, other_buttons, maze_buttons)
+        draw(grid, algo_buttons, other_buttons, maze_buttons, size_buttons)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return 0
@@ -175,15 +208,14 @@ def main():
 
                 if row < GRID_SIZE and row >= 0 and col < GRID_SIZE and col >= 0:
                     node = grid[row][col]
-                    if node.is_free():
-                        if start is None:
-                            node.select_start()
-                            start = node
-                        elif end is None:
-                            node.select_end()
-                            end = node
-                        else:
-                            node.select_barrier()
+                    if start is None:
+                        node.select_start()
+                        start = node
+                    elif end is None and not node.is_start():
+                        node.select_end()
+                        end = node
+                    else:
+                        node.select_barrier()
                 else:
                     for button in algo_buttons:
                         if button.rect.collidepoint(pos):
@@ -206,11 +238,32 @@ def main():
                                 button.algorithm(
                                     grid, 1, GRID_SIZE - 2, 1, GRID_SIZE-2)
 
+                    for button in size_buttons:
+                        if button.rect.collidepoint(pos):
+                            for other in size_buttons:
+                                if other is not button:
+                                    other.color = WHITE
+                                    other.draw()
+                            button.color = PATH_COLOR
+
+                            if button.text == "S":
+                                GRID_SIZE = 25
+                            elif button.text == "M":
+                                GRID_SIZE = 45
+                            elif button.text == "L":
+                                GRID_SIZE = 75
+
+                            SQUARE_SIZE = GRID_WIDTH // GRID_SIZE
+
+                            grid = create_grid()
+                            start, end = None, None
+                            finished = False
+                            draw_grid(grid)
+
                     for button in other_buttons:
                         if button.rect.collidepoint(pos):
                             if button.text == "RESET":
-                                grid = [[GraphNode(row, col) for col in range(GRID_SIZE)]
-                                        for row in range(GRID_SIZE)]
+                                grid = create_grid()
                                 start, end = None, None
                                 finished = False
                             elif button.text == "RUN":
@@ -232,7 +285,7 @@ def main():
                                             center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
                                         WINDOW.blit(label, text_rect)
                                         pygame.display.update()
-                                        pygame.time.delay(1500)
+                                        pygame.time.delay(500)
                                         finished = False
                                         print("PATH NOT FOUND")
                                     else:
@@ -243,6 +296,7 @@ def main():
                                 draw_grid(grid)
                             elif button.text == "SAVE":
                                 save_grid(grid, start, end)
+
             if pygame.mouse.get_pressed()[2]:
                 pos = pygame.mouse.get_pos()
                 row, col = get_grid_pos(pos)
@@ -258,9 +312,9 @@ def main():
                 print(pos)
 
 
-def draw(grid, algo_buttons=[], other_buttons=[], maze_buttons=[]):
+def draw(grid, algo_buttons=[], other_buttons=[], maze_buttons=[], size_buttons=[]):
     WINDOW.fill(BLACK)
-    for button in (algo_buttons + other_buttons + maze_buttons):
+    for button in (algo_buttons + other_buttons + maze_buttons + size_buttons):
         button.draw()
     draw_legend()
     draw_grid(grid)
@@ -407,6 +461,13 @@ def load_grid(input):
         return grid, start, end
 
 
+def create_grid():
+    grid = [[GraphNode(row, col) for col in range(GRID_SIZE)]
+            for row in range(GRID_SIZE)]
+
+    return grid
+
+
 # End parameter left for simplicity when calling selected_algorithm
 def BFS(grid, start, end):
     path = [start]
@@ -465,6 +526,7 @@ def dijkstras(grid, start, end):
                 return end.path
 
 
+# TODO optimize parents ? by using row, col combination
 def astar(grid, start, end):
     open_pqueue = PriorityQueue()
     open_pqueue.put(start)
@@ -524,14 +586,12 @@ def random_maze(grid):
     for row in range(GRID_SIZE):
         for col in range(GRID_SIZE):
             node = grid[row][col]
-            if node.is_free():
-                if choice([True, False, False]):
-                    node.select_barrier()
+            if choice([True, False, False]):
+                node.select_barrier()
 
     return grid
 
 
-# TODO reset grid functioon for RESET button and before divide
 # Recursive division maze generator
 def divide(grid, min_x, max_x, min_y,  max_y):
     width, height = max_x - min_x, max_y - min_y
@@ -550,7 +610,7 @@ def divide(grid, min_x, max_x, min_y,  max_y):
         # Draw the wall with the hole
         for x in range(min_x, max_x+1):
             if x != hole:
-                grid[x][y].select_barrier()
+                grid[y][x].select_barrier()
 
         # Recursive calls
         divide(grid, min_x, max_x, min_y, y-1)
@@ -568,13 +628,14 @@ def divide(grid, min_x, max_x, min_y,  max_y):
         # Draw the wall with the hole
         for y in range(min_y, max_y+1):
             if y != hole:
-                grid[x][y].select_barrier()
+                grid[y][x].select_barrier()
 
         # Recursive calls
         divide(grid, min_x, x-1, min_y, max_y)
         divide(grid, x+1, max_x, min_y, max_y)
 
 
+# Helper function for division()
 def choose_orientation(width, height):
     # True for horizontal, False for vertical
     if width < height:
@@ -585,6 +646,7 @@ def choose_orientation(width, height):
         return choice([True, False])
 
 
+# Adds a border for each side of the grid
 def add_border(grid):
     for i in range(GRID_SIZE):
         grid[0][i].select_barrier()
