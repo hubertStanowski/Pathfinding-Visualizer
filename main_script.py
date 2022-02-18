@@ -4,7 +4,7 @@ from math import floor, inf, sqrt
 from heapq import heappop, heappush
 from queue import PriorityQueue
 from datetime import datetime
-from random import randrange, choice
+from random import randrange, choice, shuffle
 import sys
 pygame.init()
 
@@ -16,7 +16,8 @@ GRID_SIZE = 45
 SQUARE_SIZE = GRID_WIDTH // GRID_SIZE
 SIDE_SIZE = (WINDOW_WIDTH - GRID_WIDTH) // 2
 TB_SIZE = (WINDOW_HEIGHT - GRID_HEIGHT) // 2  # Top and bottom tab size
-BUTTON_WIDTH, BUTTON_HEIGHT = (SIDE_SIZE - 100), 70
+BUTTON_WIDTH, BUTTON_HEIGHT = (SIDE_SIZE - 100) + 5, 70
+
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -169,24 +170,32 @@ def main():
     start, end = None, None
     finished = False
     selected_algorithm = None
-    algo_buttons = [Button(BFS, "BFS", 50, 50),
-                    Button(DFS, "DFS", 50, 170),
-                    Button(dijkstras, "Dijkstra's", 50, 290, offset=-54),
-                    Button(astar, "A*", 50, 410, offset=20)]
+    diff = 115
+    algo_buttons = [Button(BFS, "BFS", 50, TB_SIZE),
+                    Button(DFS, "DFS", 50, TB_SIZE + diff),
+                    Button(dijkstras, "Dijkstra's", 50,
+                           TB_SIZE + diff*2, offset=-51),
+                    Button(astar, "A*", 50, TB_SIZE + diff*3, offset=20)]
 
-    maze_buttons = [Button(random_maze, "Random", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 570, offset=-45, color=(127, 255, 148)),
-                    Button(divide, "Division", WINDOW_WIDTH - (BUTTON_WIDTH + 50), 690, offset=-45, color=(127, 255, 148))]
+    maze_buttons = [Button(random_maze, "Random", 50, TB_SIZE + diff*4, offset=-43, color=(127, 255, 148)),
+                    Button(divide, "Division", 50,
+                           TB_SIZE + diff*5, offset=-43, color=(127, 255, 148)),
+                    Button(backtrack, "Backtrack", 50, TB_SIZE + diff*6,
+                           offset=-60, color=(127, 255, 148))]
 
-    other_buttons = [Button(None, "RUN", 50, 570, offset=-5, color=GREEN),
-                     Button(None, "CLEAR", 50, 690, offset=-35, color=YELLOW),
-                     Button(None, "RESET", 50, 810, offset=-25, color=RED),
+    other_buttons = [Button(None, "RUN", WINDOW_WIDTH -
+                            (BUTTON_WIDTH + 50), TB_SIZE + 450, offset=-2, color=GREEN),
+                     Button(None, "CLEAR", WINDOW_WIDTH -
+                            (BUTTON_WIDTH + 50), TB_SIZE + 570, offset=-31, color=YELLOW),
+                     Button(None, "RESET", WINDOW_WIDTH -
+                            (BUTTON_WIDTH + 50), TB_SIZE + 690, offset=-24, color=RED),
                      Button(None, "SAVE", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), 810, offset=-15, color=BLUE)]
+                            (BUTTON_WIDTH + 50), TB_SIZE + 810, offset=-10, color=BLUE)]  # 950 ;BH 70
 
-    size_buttons = [SmallButton("S", SIDE_SIZE + GRID_WIDTH + 70, TB_SIZE + 400, offset=-1),
+    size_buttons = [SmallButton("S", SIDE_SIZE + GRID_WIDTH + 70, TB_SIZE + 375, offset=-1),
                     SmallButton("M", SIDE_SIZE + GRID_WIDTH + 130,
-                                TB_SIZE + 400, offset=-4, color=PATH_COLOR),
-                    SmallButton("L", SIDE_SIZE + GRID_WIDTH + 190, TB_SIZE + 400)]
+                                TB_SIZE + 375, offset=-4, color=PATH_COLOR),
+                    SmallButton("L", SIDE_SIZE + GRID_WIDTH + 190, TB_SIZE + 375)]
 
     if len(sys.argv) == 2:
         try:
@@ -231,11 +240,16 @@ def main():
                                 grid, start, end, save_barriers=False)
                             finished = False
                             if button.text == "Random":
-                                grid = button.algorithm(grid)
+                                button.algorithm(grid)
                             elif button.text == "Division":
                                 button.algorithm(
                                     grid, 1, GRID_SIZE - 2, 1, GRID_SIZE-2)
                                 add_border(grid)
+                            elif button.text == "Backtrack":
+                                for row in grid:
+                                    for node in row:
+                                        node.select_barrier()
+                                button.algorithm(grid, 1, 1)
 
                     for button in size_buttons:
                         if button.rect.collidepoint(pos):
@@ -327,8 +341,8 @@ def draw_path(grid, path):
         if not node.is_start() and not node.is_end():
             node.color = PATH_COLOR
             # If path is too long, skip the animation
-            if length < 200:
-                pygame.time.delay(round(25 * 20 // length))
+            if length < 150:
+                pygame.time.delay(round(25 / GRID_SIZE * 20 // length))
                 draw_grid(grid)
     draw_grid(grid)
 
@@ -362,8 +376,8 @@ def draw_legend():
     draw_legend_node("Barrier node", BARRIER_COLOR, offset=150)
     draw_legend_node("Visited node", VISITED_COLOR,  offset=200)
     draw_legend_node("Path node", PATH_COLOR,  offset=250)
-    draw_legend_node("Select a node",  offset=300, action="LMB")
-    draw_legend_node("Unselect a node",  offset=350, action="RMB")
+    draw_legend_node("Select a node",  offset=290, action="LMB")
+    draw_legend_node("Unselect a node",  offset=320, action="RMB")
 
 
 def draw_legend_node(text, color=None, offset=0, action=""):
@@ -639,7 +653,37 @@ def divide(grid, min_x, max_x, min_y,  max_y):
         divide(grid, x+1, max_x, min_y, max_y)
 
 
-# Helper function for division()
+# Recurisve backtracker maze generator
+def backtrack(grid, row, col):
+    node = grid[row][col]
+    if not node.is_start() and not node.is_end():
+        node.unselect()
+    directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+    shuffle(directions)
+
+    while len(directions) > 0:
+        direction = directions.pop()
+        r, c = row + direction[0] * 2, col + direction[1] * 2
+        if in_grid(r, c):
+            current = grid[r][c]
+
+            if not current.is_free():
+                r, c = row + direction[0], col + direction[1]
+                if in_grid(r, c):
+                    link = grid[r][c]
+                    if not link.is_start() and not link.is_end():
+                        link.unselect()
+
+                backtrack(grid, current.row, current.col)
+    return
+
+
+# Helper function for backtrack()
+def in_grid(row, col):
+    return row in range(1, GRID_SIZE-1) and col in range(1, GRID_SIZE-1)
+
+
+# Helper function for divide()
 def choose_orientation(width, height):
     # True for horizontal, False for vertical
     if width < height:
@@ -651,12 +695,12 @@ def choose_orientation(width, height):
 
 
 # Adds a border for each side of the grid
-def add_border(grid):
+def add_border(grid, depth=0):
     for i in range(GRID_SIZE):
-        grid[0][i].select_barrier()
-        grid[GRID_SIZE-1][i].select_barrier()
-        grid[i][0].select_barrier()
-        grid[i][GRID_SIZE-1].select_barrier()
+        grid[depth][i].select_barrier()
+        grid[GRID_SIZE-1-depth][i].select_barrier()
+        grid[i][depth].select_barrier()
+        grid[i][GRID_SIZE-1-depth].select_barrier()
 
     draw_grid(grid)
 
