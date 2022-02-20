@@ -20,7 +20,7 @@ SQUARE_SIZE = GRID_WIDTH // GRID_SIZE
 SIDE_SIZE = (WINDOW_WIDTH - GRID_WIDTH) // 2
 TB_SIZE = (WINDOW_HEIGHT - GRID_HEIGHT) // 2  # Top and bottom tab size
 BUTTON_WIDTH, BUTTON_HEIGHT = (SIDE_SIZE - 100) + 5, 70
-LINES = True
+LINES = False
 
 
 WHITE = (255, 255, 255)
@@ -204,17 +204,16 @@ def main():
                     Button(backtrack, "Backtrack", 50, TB_SIZE + diff*6,
                            offset=-60, color=(127, 255, 148)),
                     Button(random_maze, "Random", 50, TB_SIZE +
-                           diff*7, offset=-43, color=(127, 255, 148))
-                    ]
+                           diff*7, offset=-43, color=(127, 255, 148))]
 
-    other_buttons = [Button(None, "RUN", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), TB_SIZE + 450, offset=-2, color=GREEN),
+    other_buttons = [Button(None, "LINES", WINDOW_WIDTH -
+                            (BUTTON_WIDTH + 50), TB_SIZE + 450, offset=-24, color=FREE_COLOR),
+                     Button(None, "RUN", WINDOW_WIDTH -
+                            (BUTTON_WIDTH + 50), TB_SIZE + 570, offset=-2, color=GREEN),
                      Button(None, "CLEAR", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), TB_SIZE + 570, offset=-31, color=YELLOW),
+                            (BUTTON_WIDTH + 50), TB_SIZE + 690, offset=-31, color=YELLOW),
                      Button(None, "RESET", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), TB_SIZE + 690, offset=-24, color=RED),
-                     Button(None, "LINES", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), TB_SIZE + 810, offset=-24, color=BLUE)]
+                            (BUTTON_WIDTH + 50), TB_SIZE + 810, offset=-24, color=RED)]
 
     size_buttons = [SmallButton("S", SIDE_SIZE + GRID_WIDTH + 70, TB_SIZE + 375, offset=-1),
                     SmallButton("M", SIDE_SIZE + GRID_WIDTH + 130,
@@ -259,6 +258,7 @@ def main():
                             finished = False
                             if button.text == "Random":
                                 button.algorithm(grid)
+                                add_border(grid)
                             elif button.text == "Division":
                                 button.algorithm(
                                     grid, 1, GRID_SIZE - 2, 1, GRID_SIZE-2)
@@ -269,6 +269,7 @@ def main():
                             elif button.text == "Prim's":
                                 fill_grid(grid)
                                 prims(grid)
+                                add_border(grid)
 
                     for button in size_buttons:
                         if button.rect.collidepoint(pos):
@@ -327,7 +328,7 @@ def main():
                                 finished = False
                                 draw_grid(grid)
                             elif button.text == "LINES":
-                                pass  # TODO implement toggling lines
+                                toggle_lines(button)
 
             if pygame.mouse.get_pressed()[2]:
                 pos = pygame.mouse.get_pos()
@@ -373,17 +374,18 @@ def draw_grid(grid):
             pygame.draw.rect(WINDOW, node.color,
                              (node.x, node.y, SQUARE_SIZE, SQUARE_SIZE))
 
-    # Draw lines
-    x, y = SIDE_SIZE, TB_SIZE
-    width, height = GRID_WIDTH, GRID_HEIGHT
+    if LINES:
+        # Draw lines
+        x, y = SIDE_SIZE, TB_SIZE
+        width, height = GRID_WIDTH, GRID_HEIGHT
 
-    for i in range(GRID_SIZE + 1):
-        pygame.draw.line(WINDOW, LINE_COLOR, (x, y + i *
-                         SQUARE_SIZE), (x + width, y + i * SQUARE_SIZE))
+        for i in range(GRID_SIZE + 1):
+            pygame.draw.line(WINDOW, LINE_COLOR, (x, y + i *
+                                                  SQUARE_SIZE), (x + width, y + i * SQUARE_SIZE))
 
-        for j in range(GRID_SIZE + 1):
-            pygame.draw.line(WINDOW, LINE_COLOR, (x + j *
-                             SQUARE_SIZE, y), (x + j * SQUARE_SIZE, y + height))
+            for j in range(GRID_SIZE + 1):
+                pygame.draw.line(WINDOW, LINE_COLOR, (x + j *
+                                                      SQUARE_SIZE, y), (x + j * SQUARE_SIZE, y + height))
 
     pygame.display.update()
 
@@ -396,7 +398,7 @@ def draw_legend():
     draw_legend_node("Visited node", VISITED_COLOR,  offset=200)
     draw_legend_node("Path node", PATH_COLOR,  offset=250)
     draw_legend_node("Select a node",  offset=290, action="LMB")
-    draw_legend_node("set_free a node",  offset=320, action="RMB")
+    draw_legend_node("Unselect a node",  offset=320, action="RMB")
 
 
 def draw_legend_node(text, color=None, offset=0, action=""):
@@ -452,6 +454,16 @@ def fill_grid(grid):
     for row in grid:
         for node in row:
             node.set_barrier()
+
+
+def toggle_lines(button):
+    global LINES
+    if LINES == True:
+        LINES = False
+        button.color = FREE_COLOR
+    else:
+        LINES = True
+        button.color = BLUE
 
 
 # End parameter left for simplicity when calling selected_algorithm
@@ -600,6 +612,9 @@ def divide(grid, min_x, max_x, min_y,  max_y):
             else:
                 node.set_barrier()
 
+            if not LINES:
+                draw_grid(grid)
+
         # Recursive calls
         divide(grid, min_x, max_x, min_y, y-1)
         divide(grid, min_x, max_x, y+1, max_y)
@@ -620,6 +635,9 @@ def divide(grid, min_x, max_x, min_y,  max_y):
                 node.set_free()
             else:
                 node.set_barrier()
+
+        if not LINES:
+            draw_grid(grid)
 
         # Recursive calls
         divide(grid, min_x, x-1, min_y, max_y)
@@ -646,6 +664,8 @@ def backtrack(grid, row, col):
                     link = grid[r][c]
                     if not link.is_start() and not link.is_end():
                         link.set_free()
+                        if not LINES:
+                            draw_grid(grid)
 
                 backtrack(grid, current.row, current.col)
     return
@@ -670,8 +690,8 @@ def prims(grid):
         frontiers += frontier_barriers(grid, current_barrier)
         frontiers.remove(current_barrier)
 
-        # draw_grid(grid)
-        # pygame.time.delay(1000)
+        if not LINES:
+            draw_grid(grid)
 
 
 # Helper function for prims()
