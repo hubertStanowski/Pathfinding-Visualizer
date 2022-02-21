@@ -8,7 +8,7 @@ from random import randrange, choice, shuffle
 pygame.init()
 
 
-# TODO change save button to toggling lines on / off  + remove saving/loading using files
+# TODO fix prims()
 # TODO refactoring
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
@@ -346,7 +346,7 @@ def main():
 
 
 def draw(grid, algo_buttons=[], other_buttons=[], maze_buttons=[], size_buttons=[]):
-    WINDOW.fill(BLACK)
+    WINDOW.fill(BARRIER_COLOR)
     for button in (algo_buttons + other_buttons + maze_buttons + size_buttons):
         button.draw()
     draw_legend()
@@ -360,11 +360,15 @@ def draw_path(grid, path):
     for node in path:
         if not node.is_start() and not node.is_end():
             node.color = PATH_COLOR
-            # If path is too long, skip the animation
-            if length < 150:
-                pygame.time.delay(round(25 / GRID_SIZE * 20 // length))
-                draw_grid(grid)
-    draw_grid(grid)
+            if length > 500:
+                delay = 10
+            elif length > 200:
+                delay = 30
+            else:
+                delay = 50
+
+            pygame.time.delay(delay)
+            draw_grid(grid)
 
 
 def draw_grid(grid):
@@ -585,6 +589,7 @@ def random_maze(grid):
             node = grid[row][col]
             if choice([True, False, False]):
                 node.set_barrier()
+                draw_grid(grid)
 
     return grid
 
@@ -655,12 +660,12 @@ def backtrack(grid, row, col):
     while len(directions) > 0:
         direction = directions.pop()
         r, c = row + direction[0] * 2, col + direction[1] * 2
-        if in_grid(r, c):
+        if in_grid(r, c, offset=1):
             current = grid[r][c]
 
             if not current.is_free():
                 r, c = row + direction[0], col + direction[1]
-                if in_grid(r, c):
+                if in_grid(r, c, offset=1):
                     link = grid[r][c]
                     if not link.is_start() and not link.is_end():
                         link.set_free()
@@ -672,58 +677,38 @@ def backtrack(grid, row, col):
 
 
 def prims(grid):
-    start = grid[randrange(GRID_SIZE)][randrange(GRID_SIZE)]
-    start.set_free()
-    frontiers = frontier_barriers(grid, start)
+    # Randomly select a starting node
+    x, y = randrange(GRID_SIZE), randrange(GRID_SIZE)
+
+    # [0] = row of middle node between current frontier and previous frontier
+    # [1] = col of middle node between current frontier and previous frontier
+    # [2] = row of current frontier
+    # [3] = col of current frontier
+    frontiers = [[x, y, x, y]]
 
     while len(frontiers) > 0:
-        current_barrier = choice(frontiers)
-        neighbors = frontier_free(grid, current_barrier)
-        current_neighbor = choice(neighbors)
+        frontier = choice(frontiers)
+        frontiers.remove(frontier)
+        x, y = frontier[2], frontier[3]
 
-        # Creating a passage
-        mid_row, mid_col = (current_barrier.row + current_neighbor.row) // \
-            2, (current_barrier.col + current_neighbor.col) // 2
-        grid[mid_row][mid_col].set_free()
-        current_barrier.set_free()
-
-        frontiers += frontier_barriers(grid, current_barrier)
-        frontiers.remove(current_barrier)
-
-        if not LINES:
+        if grid[x][y].is_barrier():
+            # Create a passage
+            grid[frontier[0]][frontier[1]].set_free()
+            grid[x][y].set_free()
             draw_grid(grid)
 
-
-# Helper function for prims()
-def frontier_barriers(grid, node):
-    barriers = []
-    row, col = node.pos()
-    possible_nodes = [(row-2, col), (row+2, col), (row, col-2), (row, col+2)]
-    for coords in possible_nodes:
-        if in_grid(*coords, offset=0):
-            node = grid[coords[0]][coords[1]]
-            if node.is_barrier():
-                barriers.append(node)
-
-    return barriers
+            if (x >= 2 and grid[x-2][y].is_barrier()):
+                frontiers.append([x-1, y, x-2, y])
+            if (y >= 2 and grid[x][y-2].is_barrier()):
+                frontiers.append([x, y-1, x, y-2])
+            if (x < GRID_SIZE-2 and grid[x+2][y].is_barrier()):
+                frontiers.append([x+1, y, x+2, y])
+            if (y < GRID_SIZE-2 and grid[x][y+2].is_barrier()):
+                frontiers.append([x, y+1, x, y+2])
 
 
-# Helper function for prims()
-def frontier_free(grid, node):
-    free = []
-    row, col = node.pos()
-    possible_nodes = [(row-2, col), (row+2, col), (row, col-2), (row, col+2)]
-    for coords in possible_nodes:
-        if in_grid(*coords, offset=0):
-            node = grid[coords[0]][coords[1]]
-            if node.not_barrier():
-                free.append(node)
-
-    return free
-
-
-# Helper function for backtrack() and prims()
-def in_grid(row, col, offset=1):
+# Helper function for backtrack()
+def in_grid(row, col, offset=0):
     return row in range(offset, GRID_SIZE-offset) and col in range(offset, GRID_SIZE-offset)
 
 
