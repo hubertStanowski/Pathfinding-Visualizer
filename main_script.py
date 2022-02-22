@@ -5,10 +5,11 @@ from heapq import heappop, heappush
 from queue import PriorityQueue
 from datetime import datetime
 from random import randrange, choice, shuffle
+from time import sleep
+
 pygame.init()
 
 
-# TODO fix prims()
 # TODO refactoring
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
@@ -188,7 +189,8 @@ def main():
 
     grid = create_grid()
     start, end = None, None
-    finished = False
+    done = False
+    maze_done = False
     selected_algorithm = None
     diff = 115
     algo_buttons = [Button(BFS, "BFS", 50, TB_SIZE),
@@ -223,6 +225,9 @@ def main():
     while True:
         WINDOW.fill(BLACK)
         draw(grid, algo_buttons, other_buttons, maze_buttons, size_buttons)
+
+        # For preventing multiple clicks causing redrawing the maze several times
+        maze_done = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return 0
@@ -252,10 +257,11 @@ def main():
                                     other.draw()
 
                     for button in maze_buttons:
-                        if button.rect.collidepoint(pos):
+                        if button.rect.collidepoint(pos) and not maze_done:
                             grid, start, end = clear(
                                 grid, start, end, save_barriers=False)
-                            finished = False
+                            done = False
+                            maze_done = True
                             if button.text == "Random":
                                 button.algorithm(grid)
                                 add_border(grid)
@@ -269,7 +275,7 @@ def main():
                             elif button.text == "Prim's":
                                 fill_grid(grid)
                                 prims(grid)
-                                add_border(grid)
+                                # add_border(grid)
 
                     for button in size_buttons:
                         if button.rect.collidepoint(pos):
@@ -290,7 +296,7 @@ def main():
 
                             grid = create_grid()
                             start, end = None, None
-                            finished = False
+                            done = False
                             draw_grid(grid)
 
                     for button in other_buttons:
@@ -298,9 +304,9 @@ def main():
                             if button.text == "RESET":
                                 grid = create_grid()
                                 start, end = None, None
-                                finished = False
+                                done = False
                             elif button.text == "RUN":
-                                if start and end and not finished and selected_algorithm:
+                                if start and end and not done and selected_algorithm:
                                     # Run selected algorithm
                                     for row in range(GRID_SIZE):
                                         for col in range(GRID_SIZE):
@@ -309,7 +315,7 @@ def main():
 
                                     path = selected_algorithm(grid, start, end)
 
-                                    finished = True
+                                    done = True
                                     if not path:
                                         font = pygame.font.SysFont(FONT, 120)
                                         label = font.render(
@@ -319,13 +325,13 @@ def main():
                                         WINDOW.blit(label, text_rect)
                                         pygame.display.update()
                                         pygame.time.delay(500)
-                                        finished = False
+                                        done = False
                                         print("PATH NOT FOUND")
                                     else:
                                         draw_path(grid, path)
                             elif button.text == "CLEAR":
                                 grid, start, end = clear(grid, start, end)
-                                finished = False
+                                done = False
                                 draw_grid(grid)
                             elif button.text == "LINES":
                                 toggle_lines(button)
@@ -652,8 +658,9 @@ def divide(grid, min_x, max_x, min_y,  max_y):
 # Recurisve backtracker maze generator
 def backtrack(grid, row, col):
     node = grid[row][col]
-    if not node.is_start() and not node.is_end():
+    if node.is_barrier():
         node.set_free()
+
     directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
     shuffle(directions)
 
@@ -667,7 +674,7 @@ def backtrack(grid, row, col):
                 r, c = row + direction[0], col + direction[1]
                 if in_grid(r, c, offset=1):
                     link = grid[r][c]
-                    if not link.is_start() and not link.is_end():
+                    if link.is_barrier():
                         link.set_free()
                         if not LINES:
                             draw_grid(grid)
@@ -697,6 +704,7 @@ def prims(grid):
             grid[x][y].set_free()
             draw_grid(grid)
 
+            # If in grid, add fontiers of the current frontier (with nodes in between them) to the list of frontiers
             if (x >= 2 and grid[x-2][y].is_barrier()):
                 frontiers.append([x-1, y, x-2, y])
             if (y >= 2 and grid[x][y-2].is_barrier()):
@@ -731,7 +739,8 @@ def add_border(grid, depth=0):
         grid[i][depth].set_barrier()
         grid[i][GRID_SIZE-1-depth].set_barrier()
 
-    draw_grid(grid)
+        draw_grid(grid)
+        sleep(0.01)
 
 
 if __name__ == "__main__":
