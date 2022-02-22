@@ -8,7 +8,7 @@ from time import sleep
 
 
 # TODO refactoring
-# TODO add drawing single node
+# TODO turn off DFS for Large grid (recursion depth reached) implement iterative DFS
 # TODO add saving previous settings
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
@@ -56,6 +56,26 @@ class GraphNode:
         self.source_dist = inf  # g score in a*
         self.target_dist = inf  # f score in a*
         self.path = []
+
+    def draw(self, update=False):
+        pygame.draw.rect(WINDOW, self.color,
+                         (self.x, self.y, SQUARE_SIZE, SQUARE_SIZE))
+
+        if LINES:
+            pygame.draw.line(WINDOW, LINE_COLOR, (self.x, self.y),
+                             (self.x + SQUARE_SIZE, self.y))
+
+            pygame.draw.line(WINDOW, LINE_COLOR, (self.x, self.y),
+                             (self.x, self.y + SQUARE_SIZE))
+
+            pygame.draw.line(WINDOW, LINE_COLOR, (self.x + SQUARE_SIZE, self.y),
+                             (self.x + SQUARE_SIZE, self.y + SQUARE_SIZE))
+
+            pygame.draw.line(WINDOW, LINE_COLOR, (self.x, self.y + SQUARE_SIZE),
+                             (self.x + SQUARE_SIZE, self.y + SQUARE_SIZE))
+
+        if update:
+            pygame.display.update()
 
     def pos(self):
         return self.row, self.col
@@ -238,12 +258,15 @@ def main():
                     node = grid[row][col]
                     if start is None:
                         node.set_start()
+                        node.draw(update=True)
                         start = node
                     elif end is None and not node.is_start():
                         node.set_end()
+                        node.draw(update=True)
                         end = node
                     else:
                         node.set_barrier()
+                        node.draw(update=True)
                 else:
                     # Selecting a pathfinding algorithm
                     for button in algo_buttons:
@@ -265,19 +288,23 @@ def main():
                             maze_done = True
 
                             if button.text == "Random":
+                                draw_grid(grid)
                                 button.algorithm(grid)
 
                             elif button.text == "Division":
+                                draw_grid(grid)
                                 button.algorithm(
                                     grid, 1, GRID_SIZE - 2, 1, GRID_SIZE-2)
                                 add_border(grid)
 
                             elif button.text == "Backtrack":
                                 fill_grid(grid)
+                                draw_grid(grid)
                                 button.algorithm(grid, 1, 1)
 
                             elif button.text == "Prim's":
                                 fill_grid(grid)
+                                draw_grid(grid)
                                 button.algorithm(grid)
 
                     # Selecting and changing size of the grid
@@ -313,7 +340,7 @@ def main():
                                             current = grid[row][col]
                                             current.get_neighbors(grid)
 
-                                    path = selected_algorithm(grid, start, end)
+                                    path = selected_algorithm(start, end)
 
                                     pathfinding_done = True
                                     if not path:
@@ -329,7 +356,7 @@ def main():
                                         pathfinding_done = False
                                         print("PATH NOT FOUND")
                                     else:
-                                        draw_path(grid, path)
+                                        draw_path(path)
 
                             elif button.text == "CLEAR":
                                 # Clear the grid (keep the barriers)
@@ -356,6 +383,7 @@ def main():
                     elif node.is_end():
                         end = None
                     node.set_free()
+                    node.draw(update=True)
 
 
 # **********************
@@ -374,42 +402,27 @@ def draw(grid, buttons=[]):
 
 
 # Draw the path between start and end
-def draw_path(grid, path):
+def draw_path(path):
     length = len(path)
     for node in path:
         if not node.is_start() and not node.is_end():
             node.color = PATH_COLOR
             if length > 500:
-                delay = 10
+                delay = 5
             elif length > 200:
-                delay = 30
+                delay = 20
             else:
-                delay = 50
+                delay = 30
 
             pygame.time.delay(delay)
-            draw_grid(grid)
+            node.draw(update=True)
 
 
 # Draw the grid with lines if toggled
 def draw_grid(grid):
-    # Draw nodes
     for row in grid:
         for node in row:
-            pygame.draw.rect(WINDOW, node.color,
-                             (node.x, node.y, SQUARE_SIZE, SQUARE_SIZE))
-
-    if LINES:
-        # Draw lines
-        x, y = SIDE_SIZE, TB_SIZE
-        width, height = GRID_WIDTH, GRID_HEIGHT
-
-        for i in range(GRID_SIZE + 1):
-            pygame.draw.line(WINDOW, LINE_COLOR, (x, y + i *
-                                                  SQUARE_SIZE), (x + width, y + i * SQUARE_SIZE))
-
-            for j in range(GRID_SIZE + 1):
-                pygame.draw.line(WINDOW, LINE_COLOR, (x + j *
-                                                      SQUARE_SIZE, y), (x + j * SQUARE_SIZE, y + height))
+            node.draw()
 
     pygame.display.update()
 
@@ -475,11 +488,17 @@ def fill_grid(grid):
 def add_border(grid, depth=0):
     for i in range(GRID_SIZE):
         grid[depth][i].set_barrier()
-        grid[GRID_SIZE-1-depth][i].set_barrier()
-        grid[i][depth].set_barrier()
-        grid[i][GRID_SIZE-1-depth].set_barrier()
+        grid[depth][i].draw(update=True)
 
-        draw_grid(grid)
+        grid[GRID_SIZE-1-depth][i].set_barrier()
+        grid[GRID_SIZE-1-depth][i].draw(update=True)
+
+        grid[i][depth].set_barrier()
+        grid[i][depth].draw(update=True)
+
+        grid[i][GRID_SIZE-1-depth].set_barrier()
+        grid[i][GRID_SIZE-1-depth].draw(update=True)
+
         sleep(0.01)
 
 
@@ -518,53 +537,53 @@ def clear_grid(grid, start=None, end=None, save_barriers=True):
 # *****************************
 
 # Breadth-first search algorithm (end parameter left for universal alias selected_algorithm())
-def BFS(grid, start, end):
+def BFS(start, end):
     path = [start]
     bfs_queue = deque([[start, path]])
 
     while bfs_queue:
         current, path = bfs_queue.popleft()
 
-        draw_grid(grid)
         for neighbor in current.neighbors:
             if not neighbor.been_visited():
                 if neighbor.is_end():
                     return path + [neighbor]
                 else:
                     neighbor.set_visited()
+                    neighbor.draw(update=True)
                     bfs_queue.append([neighbor, path + [neighbor]])
 
 
 # Depth-first search algorithm (end parameter left for universal alias selected_algorithm())
-def DFS(grid, current, end, visited=None):
+def DFS(current, end, visited=None):
     # List for recreating the path
     if visited == None:
         visited = []
 
     current.set_visited()
+    current.draw(update=True)
     visited.append(current)
 
     if current.is_end():
         return visited
 
-    draw_grid(grid)
     for neighbor in current.neighbors:
         if not neighbor.been_visited():
-            path = DFS(grid, neighbor, end, visited)
+            path = DFS(neighbor, end, visited)
             if path:
                 return path
 
 
 # Dijkstra's algorithm
-def dijkstras(grid, start, end):
+def dijkstras(start, end):
     start.source_dist = 0
     to_visit = [start]
 
     while to_visit:
         current = heappop(to_visit)
         current.set_visited()
+        current.draw(update=True)
 
-        draw_grid(grid)
         for neighbor in current.neighbors:
             new_dist = current.source_dist + 1
             new_path = current.path + [current]
@@ -577,7 +596,7 @@ def dijkstras(grid, start, end):
 
 
 # A* algorithm
-def astar(grid, start, end):
+def astar(start, end):
     open_pqueue = PriorityQueue()
     open_pqueue.put(start)
     parents = {}
@@ -588,8 +607,10 @@ def astar(grid, start, end):
     while not open_pqueue.empty():
         current = open_pqueue.get()
         current.set_visited()
+        current.draw(update=True)
         open_set.remove(current)  # closing the node
 
+        # Generate and return the path when end reached
         if current.is_end():
             path = [end]
             temp = end
@@ -601,7 +622,6 @@ def astar(grid, start, end):
 
             return path
 
-        draw_grid(grid)
         for neighbor in current.neighbors:
             new_g_score = current.source_dist + 1
             if new_g_score < neighbor.source_dist:
@@ -613,6 +633,7 @@ def astar(grid, start, end):
                     open_pqueue.put(neighbor)
                     open_set.add(neighbor)
                     neighbor.set_visited()
+                    neighbor.draw(update=True)
 
 
 # Heuristic function for A* (Manhattan distance)
@@ -644,7 +665,7 @@ def random_maze(grid):
             node = grid[row][col]
             if choice([True, False, False]):
                 node.set_barrier()
-                draw_grid(grid)
+                node.draw(update=True)
 
     return grid
 
@@ -672,7 +693,7 @@ def divide(grid, min_x, max_x, min_y,  max_y):
             else:
                 node.set_barrier()
 
-            draw_grid(grid)
+            node.draw(update=True)
 
         # Recursive calls
         divide(grid, min_x, max_x, min_y, y-1)
@@ -694,7 +715,8 @@ def divide(grid, min_x, max_x, min_y,  max_y):
                 node.set_free()
             else:
                 node.set_barrier()
-            draw_grid(grid)
+
+            node.draw(update=True)
 
         # Recursive calls
         divide(grid, min_x, x-1, min_y, max_y)
@@ -706,6 +728,7 @@ def backtrack(grid, row, col):
     node = grid[row][col]
     if node.is_barrier():
         node.set_free()
+        node.draw(update=True)
 
     directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
     shuffle(directions)
@@ -724,7 +747,7 @@ def backtrack(grid, row, col):
                     link = grid[r][c]
                     if link.is_barrier():
                         link.set_free()
-                        draw_grid(grid)
+                        link.draw(update=True)
 
                 # Recursive call
                 backtrack(grid, current.row, current.col)
@@ -745,16 +768,15 @@ def prims(grid):
         frontier = choice(frontiers)
         frontiers.remove(frontier)
         x, y = frontier[2], frontier[3]
+        current = grid[x][y]
 
-        if grid[x][y].is_barrier():
+        if current.is_barrier():
+            mid = grid[frontier[0]][frontier[1]]
             # Create a passage
-            if grid[frontier[0]][frontier[1]].is_barrier():
-                grid[frontier[0]][frontier[1]].set_free()
-
-            if grid[x][y].is_barrier():
-                grid[x][y].set_free()
-
-            draw_grid(grid)
+            current.set_free()
+            current.draw(update=True)
+            mid.set_free()
+            mid.draw(update=True)
 
             # If in grid, add fontiers of the current frontier (with nodes in between them) to the list of frontiers
             if (x >= 2 and grid[x-2][y].is_barrier()):
