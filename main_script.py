@@ -9,7 +9,6 @@ from time import sleep
 
 # ! Implement iterative DFS (RecursionError: maximum recursion depth exceeded in comparison)
 # TODO add saving previous settings
-# TODO change run button to stop while running
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
 GRID_WIDTH, GRID_HEIGHT = 900, 900
@@ -228,13 +227,11 @@ def main():
                            diff*7, offset=-43, color=(127, 255, 148), algorithm=random_maze)]
 
     # Initializing buttons for grid management and view
-    diff = 120  # If changing diff change run_checks (hardcoded for simplicity)
+    diff = 120
     other_buttons = [Button("LINES", WINDOW_WIDTH -
                             (BUTTON_WIDTH + 50), TB_SIZE + 450, offset=-24, color=FREE_COLOR),
                      Button("RUN", WINDOW_WIDTH -
                             (BUTTON_WIDTH + 50), TB_SIZE + 450 + diff, offset=-2, color=START_COLOR),
-                     Button("STOP", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), TB_SIZE + 450 + diff, offset=-11, color=END_COLOR, visible=False),
                      Button("CLEAR", WINDOW_WIDTH -
                             (BUTTON_WIDTH + 50), TB_SIZE + 450 + diff*2, offset=-31, color=YELLOW),
                      Button("RESET", WINDOW_WIDTH -
@@ -296,34 +293,26 @@ def main():
                                 grid, start, end, save_barriers=False)
                             pathfinding_done = False
                             maze_done = True
-                            # Replacing "RUN" button with "STOP" button for the time of running an algorithm
-                            other_buttons[1].visible = False
-                            other_buttons[2].visible = True
-                            all_buttons = algo_buttons + other_buttons + maze_buttons + size_buttons
 
                             if button.text == "Random":
-                                draw(grid, all_buttons)
+                                draw_grid(grid)
                                 button.algorithm(grid)
 
                             elif button.text == "Division":
-                                draw(grid, all_buttons)
+                                draw_grid(grid)
                                 button.algorithm(
                                     grid, 1, GRID_SIZE - 2, 1, GRID_SIZE-2)
                                 add_border(grid)
 
                             elif button.text == "Backtrack":
                                 fill_grid(grid)
-                                draw(grid, all_buttons)
+                                draw_grid(grid)
                                 button.algorithm(grid, 1, 1)
 
                             elif button.text == "Prim's":
                                 fill_grid(grid)
-                                draw(grid, all_buttons)
+                                draw_grid(grid)
                                 button.algorithm(grid)
-
-                            # Replacing "STOP" button with "RUN" button after running an algorithm
-                            other_buttons[1].visible = True
-                            other_buttons[2].visible = False
 
                     # Selecting and changing size of the grid
                     for button in size_buttons:
@@ -352,15 +341,7 @@ def main():
                         if button.rect.collidepoint(pos):
                             if button.text == "RUN":
                                 if start and end and not pathfinding_done and selected_algorithm:
-                                    # Replacing "RUN" button with "STOP" button for the time of running an algorithm
-                                    other_buttons[1].visible = False
-                                    other_buttons[2].visible = True
-                                    all_buttons = algo_buttons + other_buttons + maze_buttons + size_buttons
-                                    draw(grid, all_buttons)
-
                                     # Run the selected algorithm
-                                    grid, start, end = clear_grid(
-                                        grid, start, end)
                                     for row in range(GRID_SIZE):
                                         for col in range(GRID_SIZE):
                                             current = grid[row][col]
@@ -369,7 +350,7 @@ def main():
                                     path = selected_algorithm(start, end)
 
                                     pathfinding_done = True
-                                    if path is None:
+                                    if not path:
                                         # Inform that no path has been found
                                         font = pygame.font.SysFont(FONT, 120)
                                         label = font.render(
@@ -383,12 +364,6 @@ def main():
                                         print("PATH NOT FOUND")
                                     else:
                                         draw_path(path)
-
-                                    sleep(0.2)
-
-                                    # Replacing "STOP" button with "RUN" button after running an algorithm
-                                    other_buttons[1].visible = True
-                                    other_buttons[2].visible = False
 
                             elif button.text == "CLEAR":
                                 # Clear the grid (keep the barriers)
@@ -420,17 +395,10 @@ def main():
 
 # Helper function for handling events
 def run_checks():
-    stop_button_rect = pygame.Rect(
-        WINDOW_WIDTH - (BUTTON_WIDTH + 50), TB_SIZE + 450 + 120, BUTTON_WIDTH, BUTTON_HEIGHT)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             raise Exception(
                 "Exiting the program while executing an algorithm! (current settings will not be saved)")
-
-        if pygame.mouse.get_pressed()[0]:
-            pos = pygame.mouse.get_pos()
-            if stop_button_rect.collidepoint(pos):
-                return "STOP"
 
 
 # **********************
@@ -590,9 +558,7 @@ def BFS(start, end):
     bfs_queue = deque([[start, path]])
 
     while bfs_queue:
-        cmd = run_checks()
-        if cmd == "STOP":
-            return []
+        run_checks()
 
         current, path = bfs_queue.popleft()
         for neighbor in current.neighbors:
@@ -607,9 +573,7 @@ def BFS(start, end):
 
 # Depth-first search algorithm (end parameter left for universal alias selected_algorithm())
 def DFS(current, end, visited=None):
-    cmd = run_checks()
-    if cmd == "STOP":
-        return []
+    run_checks()
 
     # List for recreating the path
     if visited == None:
@@ -635,9 +599,7 @@ def dijkstras(start, end):
     to_visit = [start]
 
     while to_visit:
-        cmd = run_checks()
-        if cmd == "STOP":
-            return []
+        run_checks()
 
         current = heappop(to_visit)
         current.set_visited()
@@ -664,9 +626,7 @@ def astar(start, end):
     open_set = set([start])
 
     while not open_pqueue.empty():
-        cmd = run_checks()
-        if cmd == "STOP":
-            return []
+        run_checks()
 
         current = open_pqueue.get()
         current.set_visited()
@@ -725,23 +685,19 @@ def h_euclidean(pos1, pos2):
 def random_maze(grid):
     for row in range(GRID_SIZE):
         for col in range(GRID_SIZE):
-            cmd = run_checks()
-            if cmd == "STOP":
-                return
+            run_checks()
 
             node = grid[row][col]
             if choice([True, False, False]):
                 node.set_barrier()
                 node.draw(update=True)
 
-    return
+    return grid
 
 
 # Recursive division maze generator
 def divide(grid, min_x, max_x, min_y,  max_y):
-    cmd = run_checks()
-    if cmd == "STOP":
-        return cmd
+    run_checks()
 
     width, height = max_x - min_x, max_y - min_y
     horizontal = choose_orientation(width, height)
@@ -766,13 +722,9 @@ def divide(grid, min_x, max_x, min_y,  max_y):
 
             node.draw(update=True)
 
-        # Recursive calls and handling stopping the algorithm
-        cmd = divide(grid, min_x, max_x, min_y, y-1)
-        if cmd == "STOP":
-            return cmd
-        cmd = divide(grid, min_x, max_x, y+1, max_y)
-        if cmd == "STOP":
-            return cmd
+        # Recursive calls
+        divide(grid, min_x, max_x, min_y, y-1)
+        divide(grid, min_x, max_x, y+1, max_y)
     else:
         if height < 2:
             return
@@ -793,13 +745,9 @@ def divide(grid, min_x, max_x, min_y,  max_y):
 
             node.draw(update=True)
 
-        # Recursive calls and handling stopping the algorithm
-        cmd = divide(grid, min_x, x-1, min_y, max_y)
-        if cmd == "STOP":
-            return cmd
-        cmd = divide(grid, x+1, max_x, min_y, max_y)
-        if cmd == "STOP":
-            return cmd
+        # Recursive calls
+        divide(grid, min_x, x-1, min_y, max_y)
+        divide(grid, x+1, max_x, min_y, max_y)
 
 
 # Recurisve backtracker maze generator
@@ -813,9 +761,7 @@ def backtrack(grid, row, col):
     shuffle(directions)
 
     while len(directions) > 0:
-        cmd = run_checks()
-        if cmd == "STOP":
-            return cmd
+        run_checks()
 
         # Pick a random neighboring node of "node"
         direction = directions.pop()
@@ -832,10 +778,8 @@ def backtrack(grid, row, col):
                         link.set_free()
                         link.draw(update=True)
 
-                # Recursive call and handling stopping the algorithm
-                cmd = backtrack(grid, current.row, current.col)
-                if cmd == "STOP":
-                    return cmd
+                # Recursive call
+                backtrack(grid, current.row, current.col)
 
 
 # Prim's maze generator
@@ -850,9 +794,7 @@ def prims(grid):
     frontiers = [[x, y, x, y]]
 
     while len(frontiers) > 0:
-        cmd = run_checks()
-        if cmd == "STOP":
-            return
+        run_checks()
 
         frontier = choice(frontiers)
         frontiers.remove(frontier)
