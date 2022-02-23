@@ -9,6 +9,7 @@ from time import sleep
 
 # ! Implement iterative DFS (RecursionError: maximum recursion depth exceeded in comparison)
 # TODO add saving previous settings
+# TODO Optimize clearing the grid
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
 GRID_WIDTH, GRID_HEIGHT = 900, 900
@@ -115,11 +116,14 @@ class GraphNode:
     def been_visited(self):
         return self.color == VISITED_COLOR
 
-    def copy(self):
-        new = GraphNode(self.row, self.col)
-        new.color = self.color
-
-        return new
+    def reset(self, keep_color=True):
+        if not keep_color:
+            self.color = FREE_COLOR
+        self.neighbors = []
+        self.visited = False
+        self.source_dist = inf  # g score in a*
+        self.target_dist = inf  # f score in a*
+        self.path = []
 
     def get_neighbors(self, grid):
         self.neighbors = []
@@ -289,8 +293,7 @@ def main():
                     # Selecting and generating a maze
                     for button in maze_buttons:
                         if button.rect.collidepoint(pos) and not maze_done:
-                            grid, start, end = clear_grid(
-                                grid, start, end, save_barriers=False)
+                            clear_grid(grid, save_barriers=False)
                             pathfinding_done = False
                             maze_done = True
 
@@ -367,7 +370,7 @@ def main():
 
                             elif button.text == "CLEAR":
                                 # Clear the grid (keep the barriers)
-                                grid, start, end = clear_grid(grid, start, end)
+                                clear_grid(grid)
                                 pathfinding_done = False
 
                             elif button.text == "RESET":
@@ -529,22 +532,14 @@ def toggle_lines(button):
 
 
 # Clear the grid (keep start, end and choose to keep barriers)
-def clear_grid(grid, start=None, end=None, save_barriers=True):
+def clear_grid(grid, save_barriers=True):
     for row in range(GRID_SIZE):
         for col in range(GRID_SIZE):
             node = grid[row][col]
             if (node.is_barrier() and save_barriers) or node.is_start() or node.is_end():
-                grid[row][col] = node.copy()
+                grid[row][col].reset(keep_color=True)
             else:
-                grid[row][col] = GraphNode(row, col)
-    if start:
-        start = grid[start.row][start.col]
-        start.set_start()
-    if end:
-        end = grid[end.row][end.col]
-        end.set_end()
-
-    return grid, start, end
+                grid[row][col].reset(keep_color=False)
 
 
 # *****************************
@@ -806,8 +801,9 @@ def prims(grid):
             # Create a passage
             current.set_free()
             current.draw(update=True)
-            mid.set_free()
-            mid.draw(update=True)
+            if mid.is_barrier():
+                mid.set_free()
+                mid.draw(update=True)
 
             # If in grid, add fontiers of the current frontier (with nodes in between them) to the list of frontiers
             if (x >= 2 and grid[x-2][y].is_barrier()):
