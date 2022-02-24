@@ -7,20 +7,19 @@ from random import randrange, choice, shuffle
 from time import sleep
 
 
-# TODO lines on / off button
 # TODO animation speed buttons
 # TODO add saving previous settings
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
 GRID_WIDTH, GRID_HEIGHT = 900, 900
-GRID_SIZE = 45  # Best change to divisors of 900 if LINES
+GRID_SIZE = 45  # Best change to divisors of 900 if GRID_LINES
 
 SQUARE_SIZE = GRID_WIDTH // GRID_SIZE  # Width and height of each node
 SIDE_SIZE = (WINDOW_WIDTH - GRID_WIDTH) // 2  # Side tab size
 TB_SIZE = (WINDOW_HEIGHT - GRID_HEIGHT) // 2  # Top and bottom tab size
 BUTTON_WIDTH, BUTTON_HEIGHT = (SIDE_SIZE - 100) + 5, 70
 
-LINES = False
+GRID_LINES = False
 FONT = None
 
 BLACK = (0, 0, 0)
@@ -61,7 +60,7 @@ class GraphNode:
         pygame.draw.rect(WINDOW, self.color,
                          (self.x, self.y, SQUARE_SIZE, SQUARE_SIZE))
 
-        if LINES:
+        if GRID_LINES:
             pygame.draw.line(WINDOW, LINE_COLOR, (self.x, self.y),
                              (self.x + SQUARE_SIZE, self.y))
 
@@ -205,11 +204,11 @@ class SmallButton:
 # *************************
 
 def main():
-    global GRID_SIZE, SQUARE_SIZE
+    global GRID_SIZE, SQUARE_SIZE, GRID_LINES
 
     grid = create_grid()
     start, end = None, None
-    pathfinding_done, maze_done = False, False
+    pathfinding_done, wait = False, False
     selected_algorithm = None
     clock = pygame.time.Clock()
 
@@ -234,8 +233,10 @@ def main():
 
     # Initializing buttons for grid management and view
     diff = 120
-    other_buttons = [Button("LINES", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), TB_SIZE + 450, text_offset=-17, height_offset=20, color=FREE_COLOR),
+    other_buttons = [Button("GRID OFF", WINDOW_WIDTH -
+                            (BUTTON_WIDTH + 50), TB_SIZE + 450, text_offset=-59, height_offset=20, color=FREE_COLOR),
+                     Button("GRID ON", WINDOW_WIDTH -
+                            (BUTTON_WIDTH + 50), TB_SIZE + 450, text_offset=-49, height_offset=20, color=BLUE, visible=False),
                      Button("RUN", WINDOW_WIDTH -
                             (BUTTON_WIDTH + 50), TB_SIZE + 450 + diff, text_offset=-2, color=START_COLOR),
                      Button("CLEAR", WINDOW_WIDTH -
@@ -255,8 +256,8 @@ def main():
         draw(grid, algo_buttons + other_buttons + maze_buttons + size_buttons)
         clock.tick(60)
 
-        # For preventing multiple clicks causing redrawing the maze several times
-        maze_done = False
+        # For preventing multiple clicks
+        wait = False
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -294,10 +295,10 @@ def main():
 
                     # Selecting and generating a maze
                     for button in maze_buttons:
-                        if button.rect.collidepoint(pos) and not maze_done:
+                        if button.rect.collidepoint(pos) and not wait:
                             clear_grid(grid, save_barriers=False)
                             pathfinding_done = False
-                            maze_done = True
+                            wait = True
 
                             if button.text == "Random":
                                 draw_grid(grid)
@@ -381,8 +382,13 @@ def main():
                                 start, end = None, None
                                 pathfinding_done = False
 
-                            elif button.text == "LINES":
-                                toggle_lines(button)
+                            elif button in [other_buttons[0], other_buttons[1]] and button.visible and not wait:
+                                # Toggle the lines dividing the grid (on/off)
+                                other_buttons[0].visible = not other_buttons[0].visible
+                                other_buttons[1].visible = not other_buttons[1].visible
+                                wait = True
+
+                                GRID_LINES = not GRID_LINES
 
             if pygame.mouse.get_pressed()[2]:
                 pos = pygame.mouse.get_pos()
@@ -520,17 +526,6 @@ def add_border(grid, depth=0):
         grid[i][GRID_SIZE-1-depth].draw(update=True)
 
         sleep(0.01)
-
-
-# Toggle the lines dividing the grid (on/off)
-def toggle_lines(button):
-    global LINES
-    if LINES == True:
-        LINES = False
-        button.color = FREE_COLOR
-    else:
-        LINES = True
-        button.color = BLUE
 
 
 # Clear the grid (keep start, end and choose to keep barriers)
