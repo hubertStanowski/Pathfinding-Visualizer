@@ -7,9 +7,9 @@ from random import randrange, choice, shuffle
 from time import sleep
 
 
-# ! Implement iterative DFS (RecursionError: maximum recursion depth exceeded in comparison)
+# TODO lines on / off button
+# TODO animation speed buttons
 # TODO add saving previous settings
-# TODO Optimize clearing the grid
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
 GRID_WIDTH, GRID_HEIGHT = 900, 900
@@ -158,13 +158,15 @@ class GraphNode:
 
 
 class Button:
-    def __init__(self, text, x, y, offset=0, color=WHITE, algorithm=None, visible=True):
+    def __init__(self, text, x, y, color=WHITE, text_offset=0, height_offset=0, algorithm=None, visible=True):
         self.algorithm = algorithm
         self.text = text
         self.x = x
         self.y = y
-        self.offset = offset
-        self.rect = pygame.Rect(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)
+        self.text_offset = text_offset
+        self.height_offset = height_offset
+        self.rect = pygame.Rect(
+            x, y, BUTTON_WIDTH, BUTTON_HEIGHT-height_offset)
         self.color = color
         self.visible = visible
 
@@ -176,7 +178,7 @@ class Button:
         font = pygame.font.SysFont(FONT, 60)
         label = font.render(self.text, True, BLACK)
         text_rect = pygame.Rect(
-            self.x + 60 + self.offset, self.y + 15, BUTTON_WIDTH, BUTTON_HEIGHT)
+            self.x + 60 + self.text_offset, self.y + 16 - self.height_offset // 2, BUTTON_WIDTH, BUTTON_HEIGHT)
         WINDOW.blit(label, text_rect)
 
 
@@ -216,30 +218,30 @@ def main():
     algo_buttons = [Button("BFS", 50, TB_SIZE, algorithm=BFS),
                     Button("DFS", 50, TB_SIZE + diff, algorithm=DFS),
                     Button("Dijkstra's", 50,
-                           TB_SIZE + diff*2, offset=-51, algorithm=dijkstras),
-                    Button("A*", 50, TB_SIZE + diff*3, offset=20, algorithm=astar)]
+                           TB_SIZE + diff*2, text_offset=-51, algorithm=dijkstras),
+                    Button("A*", 50, TB_SIZE + diff*3, text_offset=20, algorithm=astar)]
 
     # Initializing buttons for maze-generating algorithms
     diff = 115
     maze_buttons = [Button("Prim's", 50, TB_SIZE + diff*4,
-                           offset=-20, color=(127, 255, 148), algorithm=prims),
+                           text_offset=-20, color=(127, 255, 148), algorithm=prims),
                     Button("Division", 50,
-                           TB_SIZE + diff*5, offset=-43, color=(127, 255, 148), algorithm=divide),
+                           TB_SIZE + diff*5, text_offset=-43, color=(127, 255, 148), algorithm=divide),
                     Button("Backtrack", 50, TB_SIZE + diff*6,
-                           offset=-60, color=(127, 255, 148), algorithm=backtrack),
+                           text_offset=-60, color=(127, 255, 148), algorithm=backtrack),
                     Button("Random", 50, TB_SIZE +
-                           diff*7, offset=-43, color=(127, 255, 148), algorithm=random_maze)]
+                           diff*7, text_offset=-43, color=(127, 255, 148), algorithm=random_maze)]
 
     # Initializing buttons for grid management and view
     diff = 120
     other_buttons = [Button("LINES", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), TB_SIZE + 450, offset=-24, color=FREE_COLOR),
+                            (BUTTON_WIDTH + 50), TB_SIZE + 450, text_offset=-17, height_offset=20, color=FREE_COLOR),
                      Button("RUN", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), TB_SIZE + 450 + diff, offset=-2, color=START_COLOR),
+                            (BUTTON_WIDTH + 50), TB_SIZE + 450 + diff, text_offset=-2, color=START_COLOR),
                      Button("CLEAR", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), TB_SIZE + 450 + diff*2, offset=-31, color=YELLOW),
+                            (BUTTON_WIDTH + 50), TB_SIZE + 450 + diff*2, text_offset=-31, color=YELLOW),
                      Button("RESET", WINDOW_WIDTH -
-                            (BUTTON_WIDTH + 50), TB_SIZE + 450 + diff*3, offset=-24, color=END_COLOR)]
+                            (BUTTON_WIDTH + 50), TB_SIZE + 450 + diff*3, text_offset=-24, color=END_COLOR)]
 
     # Initializing buttons for changing grid size
     diff = 60
@@ -567,25 +569,27 @@ def BFS(start, end):
 
 
 # Depth-first search algorithm (end parameter left for universal alias selected_algorithm())
-def DFS(current, end, visited=None):
-    run_checks()
+def DFS(current, end):
+    # Replacing recursion with iteration (recursion depth exceeded)
+    call_stack = [current]
 
     # List for recreating the path
-    if visited == None:
-        visited = []
+    visited = []
 
-    current.set_visited()
-    current.draw(update=True)
-    visited.append(current)
+    while len(call_stack) > 0:
+        current = call_stack.pop()
+        run_checks()
 
-    if current.is_end():
-        return visited
+        current.set_visited()
+        current.draw(update=True)
+        visited.append(current)
 
-    for neighbor in current.neighbors:
-        if not neighbor.been_visited():
-            path = DFS(neighbor, end, visited)
-            if path:
-                return path
+        if current.is_end():
+            return visited
+
+        for neighbor in current.neighbors:
+            if not neighbor.been_visited():
+                call_stack.append(neighbor)
 
 
 # Dijkstra's algorithm
