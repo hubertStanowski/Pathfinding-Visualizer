@@ -603,19 +603,44 @@ def h_euclidean(pos1, pos2):
 # *** Maze-generating algorithms***
 # *********************************
 
-# Random maze generator (1/3 chance for barrier)
-def random_maze(graph):
-    for row in range(GRAPH_SIZE):
-        for col in range(GRAPH_SIZE):
-            run_checks()
+# Prim's maze generator
+def prims(graph):
+    # Randomly select a starting node
+    x, y = randrange(GRAPH_SIZE), randrange(GRAPH_SIZE)
 
-            node = graph[row][col]
-            if choice([True, False, False]):
-                node.set_barrier()
-                node.draw(update=True)
-                pygame.time.delay(DELAYS[ANIMATION_SPEED][GRAPH_SIZE] // 2)
+    # [0] = row of middle node between current frontier and previous frontier
+    # [1] = col of middle node between current frontier and previous frontier
+    # [2] = row of current frontier
+    # [3] = col of current frontier
+    frontiers = [[x, y, x, y]]
 
-    return graph
+    while len(frontiers) > 0:
+        run_checks()
+
+        frontier = choice(frontiers)
+        frontiers.remove(frontier)
+        x, y = frontier[2], frontier[3]
+        current = graph[x][y]
+
+        if current.is_barrier():
+            mid = graph[frontier[0]][frontier[1]]
+            # Create a passage
+            current.set_free()
+            current.draw(update=True)
+            if mid.is_barrier():
+                mid.set_free()
+                mid.draw(update=True)
+            pygame.time.delay(DELAYS[ANIMATION_SPEED][GRAPH_SIZE])
+
+            # If in the graph, add fontiers of the current frontier (with nodes in between them) to the list of frontiers
+            if (x >= 2 and graph[x-2][y].is_barrier()):
+                frontiers.append([x-1, y, x-2, y])
+            if (y >= 2 and graph[x][y-2].is_barrier()):
+                frontiers.append([x, y-1, x, y-2])
+            if (x < GRAPH_SIZE-2 and graph[x+2][y].is_barrier()):
+                frontiers.append([x+1, y, x+2, y])
+            if (y < GRAPH_SIZE-2 and graph[x][y+2].is_barrier()):
+                frontiers.append([x, y+1, x, y+2])
 
 
 # Recursive division maze generator
@@ -675,6 +700,17 @@ def divide(graph, min_x, max_x, min_y,  max_y):
         divide(graph, x+1, max_x, min_y, max_y)
 
 
+# Helper function for divide()
+def choose_orientation(width, height):
+    # True for horizontal, False for vertical
+    if width < height:
+        return True
+    elif width > height:
+        return False
+    else:
+        return choice([True, False])
+
+
 # Recurisve backtracker maze generator
 def backtrack(graph, row, col):
     node = graph[row][col]
@@ -710,60 +746,24 @@ def backtrack(graph, row, col):
                 backtrack(graph, current.row, current.col)
 
 
-# Prim's maze generator
-def prims(graph):
-    # Randomly select a starting node
-    x, y = randrange(GRAPH_SIZE), randrange(GRAPH_SIZE)
-
-    # [0] = row of middle node between current frontier and previous frontier
-    # [1] = col of middle node between current frontier and previous frontier
-    # [2] = row of current frontier
-    # [3] = col of current frontier
-    frontiers = [[x, y, x, y]]
-
-    while len(frontiers) > 0:
-        run_checks()
-
-        frontier = choice(frontiers)
-        frontiers.remove(frontier)
-        x, y = frontier[2], frontier[3]
-        current = graph[x][y]
-
-        if current.is_barrier():
-            mid = graph[frontier[0]][frontier[1]]
-            # Create a passage
-            current.set_free()
-            current.draw(update=True)
-            if mid.is_barrier():
-                mid.set_free()
-                mid.draw(update=True)
-            pygame.time.delay(DELAYS[ANIMATION_SPEED][GRAPH_SIZE])
-
-            # If in the graph, add fontiers of the current frontier (with nodes in between them) to the list of frontiers
-            if (x >= 2 and graph[x-2][y].is_barrier()):
-                frontiers.append([x-1, y, x-2, y])
-            if (y >= 2 and graph[x][y-2].is_barrier()):
-                frontiers.append([x, y-1, x, y-2])
-            if (x < GRAPH_SIZE-2 and graph[x+2][y].is_barrier()):
-                frontiers.append([x+1, y, x+2, y])
-            if (y < GRAPH_SIZE-2 and graph[x][y+2].is_barrier()):
-                frontiers.append([x, y+1, x, y+2])
-
-
 # Helper function for backtrack()
 def in_graph(row, col, offset=0):
     return row in range(offset, GRAPH_SIZE-offset) and col in range(offset, GRAPH_SIZE-offset)
 
 
-# Helper function for divide()
-def choose_orientation(width, height):
-    # True for horizontal, False for vertical
-    if width < height:
-        return True
-    elif width > height:
-        return False
-    else:
-        return choice([True, False])
+# Random maze generator (1/3 chance for barrier)
+def random_maze(graph):
+    for row in range(GRAPH_SIZE):
+        for col in range(GRAPH_SIZE):
+            run_checks()
+
+            node = graph[row][col]
+            if choice([True, False, False]):
+                node.set_barrier()
+                node.draw(update=True)
+                pygame.time.delay(DELAYS[ANIMATION_SPEED][GRAPH_SIZE] // 2)
+
+    return graph
 
 
 # *********************
