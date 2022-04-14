@@ -357,8 +357,11 @@ def draw_path(path):
             node.draw(update=True)
             prev = node
         # Delay based on length relative to GRAPH_SIZE and base delay
-        pygame.time.delay(round(4 * GRAPH_SIZE / length * 6 *
-                          DELAYS[ANIMATION_SPEED][GRAPH_SIZE]))
+        delay = round(4 * GRAPH_SIZE / length * 6 *
+                      DELAYS[ANIMATION_SPEED][GRAPH_SIZE])
+        if delay > 80:
+            delay = 80
+        pygame.time.delay(delay)
 
 
 # Draw the graph and grid if toggled
