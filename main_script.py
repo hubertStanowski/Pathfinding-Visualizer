@@ -6,7 +6,7 @@ from queue import PriorityQueue
 from random import randrange, choice, shuffle
 
 
-WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
+WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 950
 GRAPH_WIDTH, GRAPH_HEIGHT = 900, 900
 GRAPH_SIZE = 45  # Best change to divisors of GRAPH_WIDTH and GRAPH_HEIGHT
 
@@ -17,7 +17,7 @@ BUTTON_WIDTH, BUTTON_HEIGHT = (SIDE_SIZE - 100) + 5, 70
 
 
 GRID = False
-ANIMATION_SPEED = "F"
+ANIMATION_SPEED = "N"
 FONT = None
 
 # Base delays based on ANIMATION_SPEED and GRAPH_SIZE
