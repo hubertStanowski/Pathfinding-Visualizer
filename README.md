@@ -9,6 +9,7 @@ Inspired by: https://youtu.be/n4t_-NjY_Sg?t=183
 ### Required setup
 
 - Make sure you have installed [Python 3](https://www.python.org/downloads/) and [pygame](https://youtu.be/Y4Jn0UCqY28?t=163).
+- For full experience make sure your screen resolution is above 1500x950 as this is the resolution of my app.
 - Download the "main_script.py" file, navigate to its directory and run with "python main_script.py" (Windows & Linux) or "python3 main_script.py" (MacOS).
 
 ### Basic usage
