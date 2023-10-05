@@ -30,7 +30,7 @@ Inspired by: https://youtu.be/n4t_-NjY_Sg?t=183
 - You can change the size of the graph by clicking: "S" (small), "M" (medium) and "L" (large) buttons; selected button will change its color.
 - You can change the animation speed by clicking: "S" (slow), "N" (normal) and "F" (fast) buttons; selected button will change its color.
 - Current settings will be saved to "settings.txt" file.
-- If program takes too much or too litte of your screen, change the scale (Display settings)
+- If program takes too much or too litte of your screen, change the scale or resolution (Display settings).
 
 # About the algorithms
 
