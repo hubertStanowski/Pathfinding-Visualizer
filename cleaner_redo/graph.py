@@ -9,13 +9,13 @@ class Graph:
                      for row in range(size)]
         self.gridlines = gridlines
 
-    def draw(self, window):
-        # Draw the graph and grid if toggled
+    def draw(self, window, update=True):
+        # Draws the graph and grid if toggled
         for row in self.grid:
             for node in row:
                 node.draw(window, self.gridlines, update=False)
-
-        pygame.display.update()
+        if update:
+            pygame.display.update()
 
     def get_grid_pos(self, pos):
         """
