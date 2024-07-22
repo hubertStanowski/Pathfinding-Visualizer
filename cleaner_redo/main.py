@@ -12,7 +12,7 @@ import pygame
 
 
 def main():
-    def draw(buttons=[]):
+    def draw():
         WINDOW.fill(BARRIER_COLOR)
         graph.draw(WINDOW, update=False)
         draw_legend(WINDOW)
@@ -29,6 +29,9 @@ def main():
         for button in pathfinding_buttons.values():
             button.draw(WINDOW)
 
+        for button in maze_buttons.values():
+            button.draw(WINDOW)
+
         pygame.display.update()
 
     pygame.init()
@@ -38,7 +41,7 @@ def main():
     animation_speed = "N"
     graph = Graph(45, True)
 
-    pathfinding_buttons, control_buttons, size_buttons, animation_buttons = initialize_buttons(
+    pathfinding_buttons, maze_buttons, control_buttons, size_buttons, animation_buttons = initialize_buttons(
         graph, animation_speed, graph.gridlines)
 
     start, end = None, None
@@ -47,8 +50,8 @@ def main():
     clock = pygame.time.Clock()
 
     while True:
-        draw()
         clock.tick(60)
+        draw()
         wait = False    # For preventing multi-clicks
 
         for event in pygame.event.get():
@@ -112,6 +115,7 @@ def main():
                                 start, end = None, None
                                 path = None
                             elif not wait:
+                                # Toggle gridlines
                                 update_gridline_buttons(
                                     graph.gridlines, control_buttons, toggle=True)
                                 graph.toggle_gridlines()
@@ -123,6 +127,14 @@ def main():
                             selected_algorithm = label
                             update_pathfinding_buttons(
                                 label, pathfinding_buttons)
+
+                    # Select and generate a maze
+                    for label, button in maze_buttons.items():
+                        if button.rect.collidepoint(pos) and not wait:
+                            graph.clear(save_barriers=False)
+                            path = None
+                            wait = True
+                            # generate_maze(label)
 
             elif pygame.mouse.get_pressed()[2]:
                 row, col = graph.get_grid_pos(pygame.mouse.get_pos())

@@ -32,6 +32,7 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
+LIGHT_GREEN = (127, 255, 148)
 
 
 # assign colors to node types

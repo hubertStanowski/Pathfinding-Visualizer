@@ -128,4 +128,14 @@ def initialize_buttons(graph, animation_speed, gridlines):
                                                    TB_SIZE + 10 + diff*2, width_offset=-51),
                            "A*": BigButton("A*", 50, TB_SIZE + 10 + diff*3, width_offset=20)}
 
-    return pathfinding_buttons, control_buttons, size_buttons, animation_buttons
+    # Initialize buttons for maze-generating algorithms
+    maze_buttons = {"Prim's": BigButton("Prim's", 50, TB_SIZE + 10 + diff*4,
+                                        width_offset=-20, color=LIGHT_GREEN),
+                    "Division": BigButton("Division", 50,
+                                          TB_SIZE + 10 + diff*5, width_offset=-43, color=LIGHT_GREEN),
+                    "Backtrack": BigButton("Backtrack", 50, TB_SIZE + 10 + diff*6,
+                                           width_offset=-60, color=LIGHT_GREEN),
+                    "Random": BigButton("Random", 50, TB_SIZE + 10 +
+                                        diff*7, width_offset=-43, color=LIGHT_GREEN)}
+
+    return pathfinding_buttons, maze_buttons, control_buttons, size_buttons, animation_buttons
