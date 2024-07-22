@@ -50,7 +50,7 @@ class Graph:
 
             pygame.time.delay(2 * DELAYS[animation_speed][self.size])
 
-    def clear_graph(self, save_barriers=True):
+    def clear(self, save_barriers=True):
         for row in range(self.size):
             for col in range(self.size):
                 node = self.grid[row][col]

@@ -3,7 +3,7 @@ import pygame
 
 
 class BigButton:
-    def __init__(self, label, x, y, color=WHITE, width_offset=0, height_offset=0, algorithm=None, visible=True):
+    def __init__(self, label, x, y, color=FREE_COLOR, width_offset=0, height_offset=0, algorithm=None, visible=True):
         self.algorithm = algorithm
         self.label = label
         self.x = x
@@ -28,7 +28,7 @@ class BigButton:
 
 
 class SmallButton:
-    def __init__(self, label, x, y, width_offset=0, color=WHITE):
+    def __init__(self, label, x, y, width_offset=0, color=FREE_COLOR):
         self.label = label
         self.x = x
         self.y = y
@@ -67,7 +67,21 @@ def update_animation_buttons(animation_speed, animation_buttons):
             button.unselect()
 
 
-def initialize_buttons(graph, animation_speed):
+def toggle_gridline_buttons(control_buttons):
+    control_buttons["GRID ON"].visible = not control_buttons["GRID ON"].visible
+    control_buttons["GRID OFF"].visible = not control_buttons["GRID OFF"].visible
+
+
+def update_gridline_buttons(gridlines, control_buttons):
+    if gridlines:
+        control_buttons["GRID ON"].visible = True
+        control_buttons["GRID OFF"].visible = False
+    else:
+        control_buttons["GRID ON"].visible = False
+        control_buttons["GRID OFF"].visible = True
+
+
+def initialize_buttons(graph, animation_speed, gridlines):
     # Initialize buttons for changing graph size
     diff = 60
     size_buttons = {25: SmallButton("S", SIDE_SIZE + GRAPH_WIDTH + 70, TB_SIZE + 445, width_offset=-1),
@@ -85,4 +99,19 @@ def initialize_buttons(graph, animation_speed):
 
     update_animation_buttons(animation_speed, animation_buttons)
 
-    return size_buttons, animation_buttons
+    # Initialize buttons for graph management and view
+    diff = 115
+    control_buttons = {"GRID OFF": BigButton("GRID OFF", WINDOW_WIDTH -
+                                             (BUTTON_WIDTH + 50), TB_SIZE + 360, width_offset=-59, height_offset=20, color=FREE_COLOR),
+                       "GRID ON": BigButton("GRID ON", WINDOW_WIDTH -
+                                            (BUTTON_WIDTH + 50), TB_SIZE + 360, width_offset=-49, height_offset=20, color=BLUE),
+                       "RUN": BigButton("RUN", WINDOW_WIDTH -
+                                        (BUTTON_WIDTH + 50), TB_SIZE + 10 + diff*5, width_offset=-2, color=START_COLOR),
+                       "CLEAR": BigButton("CLEAR", WINDOW_WIDTH -
+                                          (BUTTON_WIDTH + 50), TB_SIZE + 10 + diff*6, width_offset=-31, color=YELLOW),
+                       "RESET": BigButton("RESET", WINDOW_WIDTH -
+                                          (BUTTON_WIDTH + 50), TB_SIZE + 10 + diff*7, width_offset=-24, color=END_COLOR)}
+
+    update_gridline_buttons(gridlines, control_buttons)
+
+    return control_buttons, size_buttons, animation_buttons

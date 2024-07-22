@@ -23,28 +23,31 @@ def main():
         for button in animation_buttons.values():
             button.draw(WINDOW)
 
+        for button in control_buttons.values():
+            button.draw(WINDOW)
+
         pygame.display.update()
 
     pygame.init()
     WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Pathfinding Algorithms Visualizer")
 
-    graph = Graph(45, gridlines=True)
     animation_speed = "N"
-    size_buttons, animation_buttons = initialize_buttons(
-        graph, animation_speed)
+    graph = Graph(45, True)
+
+    control_buttons, size_buttons, animation_buttons = initialize_buttons(
+        graph, animation_speed, graph.gridlines)
 
     start, end = None, None
-    pathfinding_done = False
+    path = None
     selected_algorithm = None
     clock = pygame.time.Clock()
 
     while True:
         draw()
         clock.tick(60)
+        wait = False    # For preventing multi-clicks
 
-        # For preventing multi-clicks
-        wait = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return 0
@@ -77,6 +80,40 @@ def main():
                             animation_speed = label
                             update_animation_buttons(
                                 animation_speed, animation_buttons)
+                    for label, button in control_buttons.items():
+                        if button.rect.collidepoint(pos):
+                            if label == "RUN":
+                                if start and end and selected_algorithm and path is None:
+                                    path = selected_algorithm(start, end)
+                                    if not path:
+                                        # Inform that no path has been found
+                                        font = pygame.font.SysFont(FONT, 120)
+                                        label = font.render(
+                                            "PATH NOT FOUND!", True, RED)
+                                        text_rect = label.get_rect(
+                                            center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+                                        WINDOW.blit(label, text_rect)
+                                        pygame.display.update()
+                                        pygame.time.delay(500)
+                                        path = None
+                                        print("PATH NOT FOUND")
+                                    else:
+                                        pass
+                                        # draw_path(path)
+                            elif label == "CLEAR":
+                                # Clear the graph (keep the barriers)
+                                graph.clear()
+                                pathfinding_done = False
+
+                            elif label == "RESET":
+                                # Reset the graph (create a completely new one)
+                                graph = Graph(graph.size, graph.gridlines)
+                                start, end = None, None
+                                pathfinding_done = False
+                            elif not wait:
+                                toggle_gridline_buttons(control_buttons)
+                                graph.gridlines = not graph.gridlines
+                                wait = True
 
             elif pygame.mouse.get_pressed()[2]:
                 row, col = graph.get_grid_pos(pygame.mouse.get_pos())
