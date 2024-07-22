@@ -8,6 +8,8 @@ class Graph:
         self.grid = [[GraphNode(row, col) for col in range(size)]
                      for row in range(size)]
         self.gridlines = gridlines
+        self.size = size
+        self.node_size = GRAPH_WIDTH // size  # Width and height of each node
 
     def draw(self, window, update=True):
         # Draws the graph and grid if toggled
@@ -22,8 +24,8 @@ class Graph:
             Turns (x,y) position on the screen to its respective (row, col) coords on the grid.
         """
         x, y = pos
-        col = (y - TB_SIZE) // NODE_SIZE
-        row = (x - SIDE_SIZE) // NODE_SIZE
+        col = (y - TB_SIZE) // self.node_size
+        row = (x - SIDE_SIZE) // self.node_size
 
         return row, col
 
@@ -33,24 +35,24 @@ class Graph:
                 node.set_barrier()
 
     def add_border(self, depth=0):
-        for i in range(GRAPH_SIZE):
+        for i in range(self.size):
             self.grid[depth][i].set_barrier()
             self.grid[depth][i].draw()
 
-            self.grid[GRAPH_SIZE-1-depth][i].set_barrier()
-            self.grid[GRAPH_SIZE-1-depth][i].draw()
+            self.grid[self.size-1-depth][i].set_barrier()
+            self.grid[self.size-1-depth][i].draw()
 
             self.grid[i][depth].set_barrier()
             self.grid[i][depth].draw()
 
-            self.grid[i][GRAPH_SIZE-1-depth].set_barrier()
-            self.grid[i][GRAPH_SIZE-1-depth].draw()
+            self.grid[i][self.size-1-depth].set_barrier()
+            self.grid[i][self.size-1-depth].draw()
 
-            pygame.time.delay(2 * DELAYS[animation_speed][GRAPH_SIZE])
+            pygame.time.delay(2 * DELAYS[animation_speed][self.size])
 
     def clear_graph(self, save_barriers=True):
-        for row in range(GRAPH_SIZE):
-            for col in range(GRAPH_SIZE):
+        for row in range(self.size):
+            for col in range(self.size):
                 node = self.grid[row][col]
                 if (node.is_barrier() and save_barriers) or node.is_start() or node.is_end():
                     self.grid[row][col].reset(keep_color=True)
@@ -63,8 +65,8 @@ class Graph:
 
 class GraphNode:
     def __init__(self, row, col):
-        self.x = SIDE_SIZE + row * NODE_SIZE
-        self.y = TB_SIZE + col * NODE_SIZE
+        self.x = SIDE_SIZE + row * self.node_size
+        self.y = TB_SIZE + col * self.node_size
         self.row = row
         self.col = col
         self.color = FREE_COLOR
@@ -79,27 +81,27 @@ class GraphNode:
 
     def draw(self, window, gridlines, update=True):
         pygame.draw.rect(window, self.color,
-                         (self.x, self.y, NODE_SIZE, NODE_SIZE))
+                         (self.x, self.y, self.node_size, self.node_size))
 
         if gridlines:
             pygame.draw.line(window, LINE_COLOR, (self.x, self.y),
-                             (self.x + NODE_SIZE, self.y))
+                             (self.x + self.node_size, self.y))
 
             pygame.draw.line(window, LINE_COLOR, (self.x, self.y),
-                             (self.x, self.y + NODE_SIZE))
+                             (self.x, self.y + self.node_size))
 
-            pygame.draw.line(window, LINE_COLOR, (self.x + NODE_SIZE, self.y),
-                             (self.x + NODE_SIZE, self.y + NODE_SIZE))
+            pygame.draw.line(window, LINE_COLOR, (self.x + self.node_size, self.y),
+                             (self.x + self.node_size, self.y + self.node_size))
 
-            pygame.draw.line(window, LINE_COLOR, (self.x, self.y + NODE_SIZE),
-                             (self.x + NODE_SIZE, self.y + NODE_SIZE))
+            pygame.draw.line(window, LINE_COLOR, (self.x, self.y + self.node_size),
+                             (self.x + self.node_size, self.y + self.node_size))
 
         if update:
             pygame.display.update()
 
     def get_neighbors(self, graph):
         def valid(row, col):
-            return 0 <= row < GRAPH_SIZE and 0 <= col < GRAPH_SIZE and not graph.grid[row][col].is_barrier()
+            return 0 <= row < self.size and 0 <= col < self.size and not graph.grid[row][col].is_barrier()
 
         neighbors = []
         for dr, dc in DIRECTIONS:

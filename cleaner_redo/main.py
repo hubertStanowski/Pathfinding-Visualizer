@@ -1,5 +1,6 @@
 from parameters import *
 from graph import *
+from buttons import *
 from legend import *
 import pygame
 
@@ -11,24 +12,28 @@ import pygame
 
 
 def main():
-    def draw():
+    def draw(buttons=[]):
         WINDOW.fill(BARRIER_COLOR)
         graph.draw(WINDOW, update=False)
         draw_legend(WINDOW)
+        for button in (buttons):
+            button.draw(WINDOW)
         pygame.display.update()
 
     pygame.init()
     WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Pathfinding Algorithms Visualizer")
 
-    graph = Graph(GRAPH_SIZE, gridlines=True)
+    size_buttons, animation_buttons = initialize_buttons()
+
+    graph = Graph(45, gridlines=True)
     start, end = None, None
     pathfinding_done = False
     selected_algorithm = None
     clock = pygame.time.Clock()
 
     while True:
-        draw()
+        draw(size_buttons+animation_buttons)
         clock.tick(60)
 
         # For preventing multi-clicks
@@ -40,7 +45,7 @@ def main():
             if pygame.mouse.get_pressed()[0]:
                 row, col = graph.get_grid_pos(pygame.mouse.get_pos())
                 # Update the selected node
-                if 0 <= row < GRAPH_SIZE and 0 <= col < GRAPH_SIZE:
+                if 0 <= row < graph.size and 0 <= col < graph.size:
                     node = graph.grid[row][col]
                     if start is None:
                         node.set_start()
@@ -55,7 +60,7 @@ def main():
             elif pygame.mouse.get_pressed()[2]:
                 row, col = graph.get_grid_pos(pygame.mouse.get_pos())
                 # Unselect the selected node
-                if 0 <= row < GRAPH_SIZE and 0 <= col < GRAPH_SIZE:
+                if 0 <= row < graph.size and 0 <= col < graph.size:
                     node = graph.grid[row][col]
                     if node.is_start():
                         start = None
