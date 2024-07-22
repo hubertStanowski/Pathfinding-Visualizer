@@ -5,11 +5,11 @@ from math import inf
 
 class Graph:
     def __init__(self, size, gridlines=False):
-        self.grid = [[GraphNode(row, col) for col in range(size)]
-                     for row in range(size)]
         self.gridlines = gridlines
         self.size = size
         self.node_size = GRAPH_WIDTH // size  # Width and height of each node
+        self.grid = [[GraphNode(row, col, self.node_size) for col in range(size)]
+                     for row in range(size)]
 
     def draw(self, window, update=True):
         # Draws the graph and grid if toggled
@@ -64,14 +64,15 @@ class Graph:
 
 
 class GraphNode:
-    def __init__(self, row, col):
-        self.x = SIDE_SIZE + row * self.node_size
-        self.y = TB_SIZE + col * self.node_size
+    def __init__(self, row, col, node_size):
+        self.x = SIDE_SIZE + row * node_size
+        self.y = TB_SIZE + col * node_size
         self.row = row
         self.col = col
         self.color = FREE_COLOR
         self.source_dist = inf  # g score in a*
         self.target_dist = inf  # f score in a*
+        self.node_size = node_size
 
     def __lt__(self, other):
         if self.target_dist is not inf:
