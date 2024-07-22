@@ -16,8 +16,13 @@ def main():
         WINDOW.fill(BARRIER_COLOR)
         graph.draw(WINDOW, update=False)
         draw_legend(WINDOW)
-        for button in (buttons):
+
+        for button in size_buttons.values():
             button.draw(WINDOW)
+
+        for button in animation_buttons.values():
+            button.draw(WINDOW)
+
         pygame.display.update()
 
     pygame.init()
@@ -35,7 +40,7 @@ def main():
     clock = pygame.time.Clock()
 
     while True:
-        draw(size_buttons+animation_buttons)
+        draw()
         clock.tick(60)
 
         # For preventing multi-clicks
@@ -45,9 +50,10 @@ def main():
                 return 0
 
             if pygame.mouse.get_pressed()[0]:
-                row, col = graph.get_grid_pos(pygame.mouse.get_pos())
-                # Update the selected node
+                pos = pygame.mouse.get_pos()
+                row, col = graph.get_grid_pos(pos)
                 if 0 <= row < graph.size and 0 <= col < graph.size:
+                    # Update the selected node
                     node = graph.grid[row][col]
                     if start is None:
                         node.set_start()
@@ -58,6 +64,19 @@ def main():
                     else:
                         node.set_barrier()
                     node.draw(WINDOW, graph.gridlines)
+                else:
+                    # Run checks on the buttons
+                    for label, button in size_buttons.items():
+                        if button.rect.collidepoint(pos):
+                            graph = Graph(label, graph.gridlines)
+                            update_size_buttons(graph, size_buttons)
+                            start, end = None, None
+                            pathfinding_done = False
+                    for label, button in animation_buttons.items():
+                        if button.rect.collidepoint(pos):
+                            animation_speed = label
+                            update_animation_buttons(
+                                animation_speed, animation_buttons)
 
             elif pygame.mouse.get_pressed()[2]:
                 row, col = graph.get_grid_pos(pygame.mouse.get_pos())
