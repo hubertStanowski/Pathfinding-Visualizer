@@ -25,7 +25,9 @@ def main():
     pygame.display.set_caption("Pathfinding Algorithms Visualizer")
 
     graph = Graph(45, gridlines=True)
-    size_buttons, animation_buttons = initialize_buttons(graph)
+    animation_speed = "N"
+    size_buttons, animation_buttons = initialize_buttons(
+        graph, animation_speed)
 
     start, end = None, None
     pathfinding_done = False

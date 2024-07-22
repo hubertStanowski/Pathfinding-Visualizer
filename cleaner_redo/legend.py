@@ -16,14 +16,14 @@ def draw_legend(window):
                      whitespace*5+40, action="LMB")
     draw_legend_node(window, "Unselect a node",  x,
                      y+whitespace*6+20, action="RMB")
-    draw_legend_node(window, "Graph size", x+44, y+whitespace*8+10)
+    draw_legend_node(window, "Graph size", x+33, y+whitespace*8+10)
     draw_legend_node(window, "Animation speed", x, y+whitespace*9+38)
 
 
 # Helper function for draw_legend
 def draw_legend_node(window, text,  x, y, color=None, action=""):
 
-    current_font = pygame.font.SysFont(font, 32)
+    current_font = pygame.font.SysFont(FONT, 32)
 
     if action != "" or color is not None:
         label = current_font.render(action + " - " + text, True, WHITE)

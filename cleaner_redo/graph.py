@@ -34,7 +34,7 @@ class Graph:
             for node in row:
                 node.set_barrier()
 
-    def add_border(self, depth=0):
+    def add_border(self, animation_speed, depth=0):
         for i in range(self.size):
             self.grid[depth][i].set_barrier()
             self.grid[depth][i].draw()

@@ -5,10 +5,7 @@ SIDE_SIZE = (WINDOW_WIDTH - GRAPH_WIDTH) // 2  # Left and right tab size
 TB_SIZE = (WINDOW_HEIGHT - GRAPH_HEIGHT) // 2  # Top and bottom tab size
 BUTTON_WIDTH, BUTTON_HEIGHT = (SIDE_SIZE - 100) + 5, 70
 
-
-animation_speed = "N"
-font = None
-
+FONT = None
 
 # Base delays based on animation_speed and graph_size
 DELAYS = {
