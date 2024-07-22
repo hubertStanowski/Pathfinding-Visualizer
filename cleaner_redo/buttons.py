@@ -3,8 +3,7 @@ import pygame
 
 
 class BigButton:
-    def __init__(self, label, x, y, color=FREE_COLOR, width_offset=0, height_offset=0, algorithm=None, visible=True):
-        self.algorithm = algorithm
+    def __init__(self, label, x, y, color=FREE_COLOR, width_offset=0, height_offset=0, visible=True):
         self.label = label
         self.x = x
         self.y = y
@@ -67,18 +66,25 @@ def update_animation_buttons(animation_speed, animation_buttons):
             button.unselect()
 
 
-def toggle_gridline_buttons(control_buttons):
-    control_buttons["GRID ON"].visible = not control_buttons["GRID ON"].visible
-    control_buttons["GRID OFF"].visible = not control_buttons["GRID OFF"].visible
-
-
-def update_gridline_buttons(gridlines, control_buttons):
+def update_gridline_buttons(gridlines, control_buttons, toggle=False):
     if gridlines:
         control_buttons["GRID ON"].visible = True
         control_buttons["GRID OFF"].visible = False
     else:
         control_buttons["GRID ON"].visible = False
         control_buttons["GRID OFF"].visible = True
+
+    if toggle:
+        control_buttons["GRID ON"].visible = not control_buttons["GRID ON"].visible
+        control_buttons["GRID OFF"].visible = not control_buttons["GRID OFF"].visible
+
+
+def update_pathfinding_buttons(selected, pathfinding_buttons):
+    for label, button in pathfinding_buttons.items():
+        if label != selected:
+            button.color = FREE_COLOR
+        else:
+            button.color = PATH_COLOR
 
 
 def initialize_buttons(graph, animation_speed, gridlines):
@@ -114,4 +120,12 @@ def initialize_buttons(graph, animation_speed, gridlines):
 
     update_gridline_buttons(gridlines, control_buttons)
 
-    return control_buttons, size_buttons, animation_buttons
+    # Initialize buttons for pathfinding algorithms
+    pathfinding_buttons = {"BFS": BigButton("BFS", 50, TB_SIZE + 10),
+                           "DFS": BigButton("DFS", 50, TB_SIZE +
+                                            10 + diff),
+                           "Dijkstra's": BigButton("Dijkstra's", 50,
+                                                   TB_SIZE + 10 + diff*2, width_offset=-51),
+                           "A*": BigButton("A*", 50, TB_SIZE + 10 + diff*3, width_offset=20)}
+
+    return pathfinding_buttons, control_buttons, size_buttons, animation_buttons
