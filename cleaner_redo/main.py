@@ -8,10 +8,11 @@ import pygame
 
 def main():
     pygame.init()
-    WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    window = pygame.display.set_mode(
+        (WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Pathfinding Algorithms Visualizer")
 
-    screen = Screen(WINDOW)
+    screen = Screen(window)
     screen.set_graph(Graph(size=45))
     screen.set_legend(initialize_legend())
     initialize_buttons(screen)
@@ -27,6 +28,10 @@ def main():
         wait = False    # For preventing multi-clicks
 
         for event in pygame.event.get():
+            if event.type == pygame.VIDEORESIZE:
+                window = pygame.display.set_mode(
+                    (event.w, event.h), pygame.RESIZABLE)
+                screen.window = window
             if event.type == pygame.QUIT:
                 return 0
 
@@ -36,7 +41,7 @@ def main():
                 if graph.is_valid_node(row, col):
                     node = graph.grid[row][col]
                     graph.select_node(node)
-                    node.draw(WINDOW, graph.gridlines)
+                    node.draw(window, graph.gridlines)
                 else:
                     for label, button in screen.buttons["size_buttons"].items():
                         if button.rect.collidepoint(pos):
@@ -90,7 +95,7 @@ def main():
                 if graph.is_valid_node(row, col):
                     node = graph.grid[row][col]
                     graph.unselect_node(node)
-                    node.draw(WINDOW, graph.gridlines)
+                    node.draw(window, graph.gridlines)
 
 
 if __name__ == "__main__":
