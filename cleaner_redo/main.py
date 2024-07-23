@@ -1,14 +1,10 @@
 from parameters import *
 from graph import *
 from buttons import *
+from helpers import *
 from legend import *
-import pygame
 
-# from collections import deque
-# from math import floor, inf, sqrt
-# from heapq import heappop, heappush
-# from queue import PriorityQueue
-# from random import randrange, choice, shuffle
+import pygame
 
 
 def main():
@@ -81,11 +77,13 @@ def main():
                             update_size_buttons(graph, size_buttons)
                             start, end = None, None
                             path = None
+
                     for label, button in animation_buttons.items():
                         if button.rect.collidepoint(pos):
                             animation_speed = label
                             update_animation_buttons(
                                 animation_speed, animation_buttons)
+
                     for label, button in control_buttons.items():
                         if button.rect.collidepoint(pos):
                             if label == "RUN":
@@ -147,35 +145,6 @@ def main():
                         end = None
                     node.set_free()
                     node.draw(WINDOW, graph.gridlines)
-
-
-# Helper function for handling events within algorithms
-def run_checks():
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            raise Exception(
-                "Exiting the program while executing an algorithm! (current settings will not be saved)")
-
-
-# Draw the path between start and end
-def draw_path(path, graph, animation_speed):
-    length = len(path)
-    prev = path[0]
-    for node in path[1:]:
-        run_checks()
-        if not prev.is_start():
-            prev.color = PATH_COLOR
-            prev.draw(update=True)
-        if not node.is_start() and not node.is_end():
-            node.color = YELLOW
-            node.draw(update=True)
-            prev = node
-        # Delay based on length relative to GRAPH_SIZE and base delay
-        delay = round(4 * graph.size / length * 6 *
-                      DELAYS[animation_speed][graph.size])
-        if delay > 80:
-            delay = 80
-        pygame.time.delay(delay)
 
 
 if __name__ == "__main__":
