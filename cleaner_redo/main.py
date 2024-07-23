@@ -5,7 +5,6 @@ from helpers import *
 from buttons import *
 from legend import initialize_legend
 
-
 import pygame
 
 
@@ -17,7 +16,7 @@ def main():
 
     screen = Screen(window)
     screen.set_graph(Graph(window, size=45))
-    screen.set_legend(initialize_legend())
+    screen.set_legend(initialize_legend(screen))
     initialize_buttons(screen)
 
     path = None

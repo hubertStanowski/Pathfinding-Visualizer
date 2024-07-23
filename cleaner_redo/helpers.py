@@ -55,10 +55,10 @@ def draw_path(screen, path):
         run_checks()
         if not prev.is_start():
             prev.color = PATH_COLOR
-            prev.draw(screen.window, graph.gridlines, update=True)
+            prev.draw(screen.window, graph, update=True)
         if not node.is_start() and not node.is_end():
             node.color = YELLOW
-            node.draw(screen.window, graph.gridlines, update=True)
+            node.draw(screen.window, graph, update=True)
             prev = node
         # Delay based on length relative to GRAPH_SIZE and base delay
         delay = round(4 * graph.size / len(path) * 6 *
@@ -71,10 +71,11 @@ def draw_path(screen, path):
 # Inform that no path has been found
 def handle_no_path(screen):
     font = pygame.font.SysFont(FONT, 120)
+    window_width, window_height = screen.window.get_size()
     label = font.render(
         "PATH NOT FOUND!", True, RED)
     label_rect = label.get_rect(
-        center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        center=(window_width // 2, window_height // 2))
 
     screen.window.blit(label, label_rect)
     pygame.display.update()

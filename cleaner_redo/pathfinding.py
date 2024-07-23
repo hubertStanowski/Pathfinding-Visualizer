@@ -20,7 +20,7 @@ def BFS(screen):
                     return path + [neighbor]
                 else:
                     neighbor.set_visited()
-                    neighbor.draw(screen.window, graph.gridlines)
+                    neighbor.draw(screen.window, graph)
                     pygame.time.delay(
                         DELAYS[screen.animation_speed][graph.size])
                     queue.append((neighbor, path + [neighbor]))
@@ -39,7 +39,7 @@ def DFS(screen):
         current.set_visited()
         visited.append(current)
 
-        current.draw(screen.window, graph.gridlines)
+        current.draw(screen.window, graph)
         pygame.time.delay(DELAYS[screen.animation_speed][graph.size])
 
         if current.is_end():

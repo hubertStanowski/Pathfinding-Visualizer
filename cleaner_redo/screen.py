@@ -14,12 +14,12 @@ class Screen:
         self.window.fill(self.background)
         if self.graph:
             self.graph.draw(self.window, update=False)
-        # if self.legend:
-        #     self.legend.draw(self.window)
-        # if self.buttons:
-        #     for current_buttons in self.buttons.values():
-        #         for button in current_buttons.values():
-        #             button.draw(self.window)
+        if self.legend:
+            self.legend.draw(self.window)
+        if self.buttons:
+            for current_buttons in self.buttons.values():
+                for button in current_buttons.values():
+                    button.draw(self.window)
 
         pygame.display.update()
 

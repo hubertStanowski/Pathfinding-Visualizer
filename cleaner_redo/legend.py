@@ -1,4 +1,5 @@
 from parameters import *
+from helpers import *
 
 import pygame
 
@@ -41,9 +42,11 @@ class LegendNode:
         window.blit(label, label_rect)
 
 
-def initialize_legend():
+def initialize_legend(screen):
     legend = Legend()
-    x, y = SIDE_SIZE + GRAPH_WIDTH + 30, TB_SIZE + 8
+    x = get_side_tab_size(screen.window, screen.graph) + \
+        get_grid_size(screen.window, screen.graph) + 30
+    y = get_tb_tab_size(screen.window, screen.graph) + 8
     diff = 50
 
     legend.add_node(LegendNode("Start node", x, y, START_COLOR))
