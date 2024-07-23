@@ -26,6 +26,8 @@ class Graph:
     def search(self, screen, selected_algorithm):
         if selected_algorithm == "BFS":
             return BFS(screen)
+        elif selected_algorithm == "DFS":
+            return DFS(screen)
 
     def get_grid_pos(self, pos):
         """
