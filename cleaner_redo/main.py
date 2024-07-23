@@ -1,5 +1,6 @@
 from parameters import *
 from graph import *
+from pathfinding import *
 from buttons import *
 from helpers import *
 from legend import *
@@ -88,7 +89,8 @@ def main():
                         if button.rect.collidepoint(pos):
                             if label == "RUN":
                                 if start and end and selected_algorithm and path is None:
-                                    # path = search(start, end, selected_algorithm)
+                                    path = search(
+                                        WINDOW, start, end, graph, selected_algorithm, animation_speed)
                                     if not path:
                                         # Inform that no path has been found
                                         font = pygame.font.SysFont(FONT, 120)
@@ -102,7 +104,8 @@ def main():
                                         path = None
                                         print("PATH NOT FOUND")
                                     else:
-                                        draw_path(path)
+                                        draw_path(WINDOW, path, graph,
+                                                  animation_speed)
                             elif label == "CLEAR":
                                 # Clear the graph (keep the barriers)
                                 graph.clear()
