@@ -1,4 +1,5 @@
 from parameters import *
+from helpers import *
 from pathfinding import *
 
 import pygame
@@ -6,22 +7,25 @@ from math import inf
 
 
 class Graph:
-    def __init__(self, size, gridlines=False):
+    def __init__(self, window, size, gridlines=False):
         self.gridlines = gridlines
         self.size = size
-        self.node_size = GRAPH_WIDTH // size
-        self.grid = [[GraphNode(row, col, self.node_size) for col in range(size)]
+        self.node_size = round(get_grid_size(window, self) / size)
+        self.grid = [[GraphNode(row, col) for col in range(size)]
                      for row in range(size)]
         self.start = None
         self.end = None
 
     def draw(self, window, update=True):
-        # Draws the graph and grid if toggled
+        # Draws the graph and gridlines if toggled
         for row in self.grid:
             for node in row:
-                node.draw(window, self.gridlines, update=False)
+                node.draw(window, self, update=False)
         if update:
             pygame.display.update()
+
+    def resize_nodes(self, window):
+        self.node_size = round(get_grid_size(window, self) / self.size)
 
     def search(self, screen, selected_algorithm):
         if selected_algorithm == "BFS":
@@ -29,13 +33,13 @@ class Graph:
         elif selected_algorithm == "DFS":
             return DFS(screen)
 
-    def get_grid_pos(self, pos):
+    def get_grid_pos(self, window, pos):
         """
             Turns (x,y) position on the screen to its respective (row, col) coords on the grid.
         """
         x, y = pos
-        col = (y - TB_SIZE) // self.node_size
-        row = (x - SIDE_SIZE) // self.node_size
+        col = (y - get_tb_tab_size(window, self)) // self.node_size
+        row = (x - get_side_tab_size(window, self)) // self.node_size
 
         return row, col
 
@@ -107,10 +111,7 @@ class Graph:
 
 
 class GraphNode:
-    def __init__(self, row, col, node_size):
-        self.x = SIDE_SIZE + row * node_size
-        self.y = TB_SIZE + col * node_size
-        self.node_size = node_size
+    def __init__(self, row, col):
         self.row = row
         self.col = col
         self.color = FREE_COLOR
@@ -123,22 +124,25 @@ class GraphNode:
 
         return self.source_dist < other.source_dist
 
-    def draw(self, window, gridlines, update=True):
+    def draw(self, window, graph, update=True):
+        x = get_side_tab_size(window, graph) + self.row * graph.node_size
+        y = get_tb_tab_size(window, graph) + self.col * graph.node_size
+
         pygame.draw.rect(window, self.color,
-                         (self.x, self.y, self.node_size, self.node_size))
+                         (x, y, graph.node_size, graph.node_size))
 
-        if gridlines:
-            pygame.draw.line(window, LINE_COLOR, (self.x, self.y),
-                             (self.x + self.node_size, self.y))
+        if graph.gridlines:
+            pygame.draw.line(window, LINE_COLOR, (x, y),
+                             (x + graph.node_size, y))
 
-            pygame.draw.line(window, LINE_COLOR, (self.x, self.y),
-                             (self.x, self.y + self.node_size))
+            pygame.draw.line(window, LINE_COLOR, (x, y),
+                             (x, y + graph.node_size))
 
-            pygame.draw.line(window, LINE_COLOR, (self.x + self.node_size, self.y),
-                             (self.x + self.node_size, self.y + self.node_size))
+            pygame.draw.line(window, LINE_COLOR, (x + graph.node_size, y),
+                             (x + graph.node_size, y + graph.node_size))
 
-            pygame.draw.line(window, LINE_COLOR, (self.x, self.y + self.node_size),
-                             (self.x + self.node_size, self.y + self.node_size))
+            pygame.draw.line(window, LINE_COLOR, (x, y + graph.node_size),
+                             (x + graph.node_size, y + graph.node_size))
 
         if update:
             pygame.display.update()

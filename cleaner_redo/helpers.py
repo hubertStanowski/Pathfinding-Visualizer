@@ -1,6 +1,4 @@
-from pathfinding import *
 from parameters import *
-
 
 import pygame
 
@@ -12,41 +10,41 @@ def run_checks():
             raise Exception(
                 "Exiting the program while executing an algorithm! (current settings will not be saved)")
 
-# GRAPH_WIDTH, GRAPH_HEIGHT = 900, 900
-# WINDOW_WIDTH, WINDOW_HEIGHT = 1500, 1000
-# SIDE_SIZE = (WINDOW_WIDTH - GRAPH_WIDTH) // 2  # Left and right tab size
-# TB_SIZE = (WINDOW_HEIGHT - GRAPH_HEIGHT) // 2  # Top and bottom tab size
-# BUTTON_WIDTH, BUTTON_HEIGHT = (SIDE_SIZE - 100) + 5, 70
-# SMALL_BUTTON_SIZE = 40
 
+# def get_grid_size(window):
+#     return round(min(window.get_size()) * 0.9)
 
-def get_grid_size(window):
-    return round(min(window.get_size()) * 0.9)
+def get_grid_size(window, graph):
+    intended = round(min(window.get_size()) * 0.9)
+    node_size = round(intended / graph.size)
+    actual = node_size * graph.size
+
+    return actual
 
 
 # Top and bottom tab size
-def get_tb_tab_size(window):
+def get_tb_tab_size(window, graph):
     _, window_height = window.get_size()
 
-    return round((window_height - get_grid_size(window)) / 2)
+    return round((window_height - get_grid_size(window, graph)) / 2)
 
 
-def get_side_tab_size(window):
+def get_side_tab_size(window, graph):
     window_width, _ = window.get_size()
 
-    return round((window_width - get_grid_size(window)) / 2)
+    return round((window_width - get_grid_size(window, graph)) / 2)
 
 
-def get_big_button_size(window):
+def get_big_button_size(window, graph):
     window_width, window_height = window.get_size()
-    button_width = get_side_tab_size(window) - (1/15 * window_width)
+    button_width = get_side_tab_size(window, graph) - (1/15 * window_width)
     button_height = 7/100 * window_height
 
     return button_width, button_height
 
 
-def get_small_button_size(window):
-    return get_side_tab_size(window) * 4/30
+def get_small_button_size(window, graph):
+    return get_side_tab_size(window, graph) * 4/30
 
 
 # Draw the path between start and end

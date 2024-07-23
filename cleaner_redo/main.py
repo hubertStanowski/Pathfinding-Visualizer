@@ -12,11 +12,11 @@ import pygame
 def main():
     pygame.init()
     window = pygame.display.set_mode(
-        (WINDOW_WIDTH, WINDOW_HEIGHT), pygame.RESIZABLE)
+        (1500, 1000), pygame.RESIZABLE)
     pygame.display.set_caption("Pathfinding Algorithms Visualizer")
 
     screen = Screen(window)
-    screen.set_graph(Graph(size=45))
+    screen.set_graph(Graph(window, size=45))
     screen.set_legend(initialize_legend())
     initialize_buttons(screen)
 
@@ -25,15 +25,12 @@ def main():
     clock = pygame.time.Clock()
 
     while True:
-        #! TESTING
-        print(get_side_tab_size(window))
         clock.tick(60)
         screen.draw()
         graph = screen.graph
         wait = False    # For preventing multi-clicks
 
         for event in pygame.event.get():
-
             if event.type == pygame.QUIT:
                 return 0
 
@@ -42,20 +39,24 @@ def main():
                     (event.w, event.h), pygame.RESIZABLE)
                 screen.resize_window(window)
                 #! TESTING
-                print(window.get_size())
+                print("WINDOW ", window.get_size())
+                print("GRID ", get_grid_size(window, graph))
+                print("TB ", get_tb_tab_size(window, graph))
+                print("SIDE ", get_side_tab_size(window, graph))
+                #! TESTING
 
             if pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()
-                row, col = graph.get_grid_pos(pos)
+                row, col = graph.get_grid_pos(window, pos)
                 if graph.is_valid_node(row, col):
                     node = graph.grid[row][col]
                     graph.select_node(node)
-                    node.draw(window, graph.gridlines)
+                    node.draw(window, graph)
                 else:
                     for label, button in screen.buttons["size_buttons"].items():
                         if button.rect.collidepoint(pos):
                             screen.set_graph(
-                                Graph(label, graph.gridlines))
+                                Graph(window, label, graph.gridlines))
                             update_size_buttons(screen)
                             path = None
 
@@ -79,7 +80,7 @@ def main():
                                 path = None
                             elif label == "RESET":
                                 screen.set_graph(
-                                    Graph(graph.size, graph.gridlines))
+                                    Graph(window, graph.size, graph.gridlines))
                                 path = None
                             elif not wait:
                                 update_gridline_buttons(screen, toggle=True)
@@ -100,11 +101,11 @@ def main():
                             # generate_maze(label)
 
             elif pygame.mouse.get_pressed()[2]:
-                row, col = graph.get_grid_pos(pygame.mouse.get_pos())
+                row, col = graph.get_grid_pos(window, pygame.mouse.get_pos())
                 if graph.is_valid_node(row, col):
                     node = graph.grid[row][col]
                     graph.unselect_node(node)
-                    node.draw(window, graph.gridlines)
+                    node.draw(window, graph)
 
 
 if __name__ == "__main__":
