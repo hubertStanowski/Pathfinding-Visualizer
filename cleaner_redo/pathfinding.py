@@ -6,8 +6,9 @@ from collections import deque
 
 
 # Breadth-first search algorithm
-def BFS(window, start, graph, animation_speed):
-    queue = deque([(start, [start])])
+def BFS(screen):
+    graph = screen.graph
+    queue = deque([(graph.start, [graph.start])])
 
     while queue:
         run_checks()
@@ -19,11 +20,7 @@ def BFS(window, start, graph, animation_speed):
                     return path + [neighbor]
                 else:
                     neighbor.set_visited()
-                    neighbor.draw(window, graph.gridlines)
-                    pygame.time.delay(DELAYS[animation_speed][graph.size])
+                    neighbor.draw(screen.window, graph.gridlines)
+                    pygame.time.delay(
+                        DELAYS[screen.animation_speed][graph.size])
                     queue.append((neighbor, path + [neighbor]))
-
-
-def search(window, start, end, graph, selected_algorithm, animation_speed):
-    if selected_algorithm == "BFS":
-        return BFS(window, start, graph, animation_speed)

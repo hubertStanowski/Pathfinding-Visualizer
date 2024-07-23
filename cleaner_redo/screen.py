@@ -26,11 +26,11 @@ class Screen:
     def add_buttons(self, label, buttons):
         self.buttons[label] = buttons
 
-    def set_legend(self, legend):
-        self.legend = legend
+    def set_legend(self, new_legend):
+        self.legend = new_legend
 
-    def set_graph(self, graph):
-        self.graph = graph
+    def set_graph(self, new_graph):
+        self.graph = new_graph
 
     def set_animation_speed(self, new_animation_speed):
         self.animation_speed = new_animation_speed

@@ -1,4 +1,6 @@
 from parameters import *
+from pathfinding import *
+
 import pygame
 from math import inf
 
@@ -20,6 +22,10 @@ class Graph:
                 node.draw(window, self.gridlines, update=False)
         if update:
             pygame.display.update()
+
+    def search(self, screen, selected_algorithm):
+        if selected_algorithm == "BFS":
+            return BFS(screen)
 
     def get_grid_pos(self, pos):
         """
@@ -57,12 +63,31 @@ class Graph:
             for col in range(self.size):
                 node = self.grid[row][col]
                 if (node.is_barrier() and save_barriers) or node.is_start() or node.is_end():
-                    self.grid[row][col].reset(keep_color=True)
+                    node.reset(keep_color=True)
                 else:
-                    self.grid[row][col].reset(keep_color=False)
+                    node.reset(keep_color=False)
 
     def toggle_gridlines(self):
         self.gridlines = not self.gridlines
+
+    def select_node(self, node):
+        if not self.start:
+            self.set_start(node)
+        elif not self.end and not node.is_start():
+            self.set_end(node)
+        else:
+            node.set_barrier()
+
+    def unselect_node(self, node):
+        if node.is_start():
+            self.reset_start()
+        elif node.is_end():
+            self.reset_end()
+
+        node.set_free()
+
+    def is_valid_node(self, row, col):
+        return 0 <= row < self.size and 0 <= col < self.size
 
     def set_start(self, node):
         self.start = node
@@ -83,12 +108,12 @@ class GraphNode:
     def __init__(self, row, col, node_size):
         self.x = SIDE_SIZE + row * node_size
         self.y = TB_SIZE + col * node_size
+        self.node_size = node_size
         self.row = row
         self.col = col
         self.color = FREE_COLOR
         self.source_dist = inf  # g score in a*
         self.target_dist = inf  # f score in a*
-        self.node_size = node_size
 
     def __lt__(self, other):
         if self.target_dist is not inf:
@@ -117,12 +142,12 @@ class GraphNode:
             pygame.display.update()
 
     def get_neighbors(self, graph):
-        def valid(row, col):
-            return 0 <= row < graph.size and 0 <= col < graph.size and not graph.grid[row][col].is_barrier()
+        def valid_neighbor(row, col):
+            return graph.is_valid_node(row, col) and not graph.grid[row][col].is_barrier()
 
         neighbors = []
         for dr, dc in DIRECTIONS:
-            if valid(self.row+dr, self.col+dc):
+            if valid_neighbor(self.row+dr, self.col+dc):
                 neighbors.append(graph.grid[self.row+dr][self.col+dc])
 
         return neighbors

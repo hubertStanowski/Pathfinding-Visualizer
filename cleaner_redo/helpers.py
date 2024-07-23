@@ -1,6 +1,8 @@
+from pathfinding import *
 from parameters import *
 from legend import *
 from buttons import *
+
 
 import pygame
 
@@ -17,6 +19,7 @@ def initialize_legend():
     legend = Legend()
     x, y = SIDE_SIZE + GRAPH_WIDTH + 30, TB_SIZE + 8
     diff = 50
+
     legend.add_node(LegendNode("Start node", x, y, START_COLOR))
     legend.add_node(LegendNode("End node", x, y+diff, END_COLOR))
     legend.add_node(LegendNode("Free node", x, y+diff*2, FREE_COLOR))
@@ -109,16 +112,18 @@ def update_animation_buttons(screen):
 
 
 def update_gridline_buttons(screen, toggle=False):
+    grid_on = screen.buttons["control_buttons"]["GRID ON"]
+    grid_off = screen.buttons["control_buttons"]["GRID OFF"]
     if screen.graph.gridlines:
-        screen.buttons["control_buttons"]["GRID ON"].visible = True
-        screen.buttons["control_buttons"]["GRID OFF"].visible = False
+        grid_on.visible = True
+        grid_off.visible = False
     else:
-        screen.buttons["control_buttons"]["GRID ON"].visible = False
-        screen.buttons["control_buttons"]["GRID OFF"].visible = True
+        grid_on.visible = False
+        grid_off.visible = True
 
     if toggle:
-        screen.buttons["control_buttons"]["GRID ON"].visible = not screen.buttons["control_buttons"]["GRID ON"].visible
-        screen.buttons["control_buttons"]["GRID OFF"].visible = not screen.buttons["control_buttons"]["GRID OFF"].visible
+        grid_on.visible = not grid_on.visible
+        grid_off.visible = not grid_off.visible
 
 
 def update_pathfinding_buttons(screen, selected):
@@ -130,21 +135,34 @@ def update_pathfinding_buttons(screen, selected):
 
 
 # Draw the path between start and end
-def draw_path(window, path, graph, animation_speed):
-    length = len(path)
+def draw_path(screen, path):
+    graph = screen.graph
     prev = path[0]
     for node in path[1:]:
         run_checks()
         if not prev.is_start():
             prev.color = PATH_COLOR
-            prev.draw(window, graph.gridlines, update=True)
+            prev.draw(screen.window, graph.gridlines, update=True)
         if not node.is_start() and not node.is_end():
             node.color = YELLOW
-            node.draw(window, graph.gridlines, update=True)
+            node.draw(screen.window, graph.gridlines, update=True)
             prev = node
         # Delay based on length relative to GRAPH_SIZE and base delay
-        delay = round(4 * graph.size / length * 6 *
-                      DELAYS[animation_speed][graph.size])
+        delay = round(4 * graph.size / len(path) * 6 *
+                      DELAYS[screen.animation_speed][graph.size])
         if delay > 80:
             delay = 80
         pygame.time.delay(delay)
+
+
+# Inform that no path has been found
+def handle_no_path(screen):
+    font = pygame.font.SysFont(FONT, 120)
+    label = font.render(
+        "PATH NOT FOUND!", True, RED)
+    label_rect = label.get_rect(
+        center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+
+    screen.window.blit(label, label_rect)
+    pygame.display.update()
+    pygame.time.delay(500)
