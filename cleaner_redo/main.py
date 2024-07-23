@@ -2,6 +2,9 @@ from parameters import *
 from screen import *
 from graph import *
 from helpers import *
+from buttons import *
+from legend import initialize_legend
+
 
 import pygame
 
@@ -22,18 +25,24 @@ def main():
     clock = pygame.time.Clock()
 
     while True:
+        #! TESTING
+        print(get_side_tab_size(window))
         clock.tick(60)
         screen.draw()
         graph = screen.graph
         wait = False    # For preventing multi-clicks
 
         for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                return 0
+
             if event.type == pygame.VIDEORESIZE:
                 window = pygame.display.set_mode(
                     (event.w, event.h), pygame.RESIZABLE)
-                screen.window = window
-            if event.type == pygame.QUIT:
-                return 0
+                screen.resize_window(window)
+                #! TESTING
+                print(window.get_size())
 
             if pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()

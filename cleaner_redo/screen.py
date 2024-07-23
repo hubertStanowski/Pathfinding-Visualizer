@@ -23,6 +23,9 @@ class Screen:
 
         pygame.display.update()
 
+    def resize_window(self, new_window):
+        self.window = new_window
+
     def add_buttons(self, label, buttons):
         self.buttons[label] = buttons
 

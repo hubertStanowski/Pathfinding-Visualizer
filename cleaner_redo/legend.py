@@ -39,3 +39,24 @@ class LegendNode:
             pygame.draw.rect(window, LINE_COLOR, (self.x, self.y, 30, 30), 1)
 
         window.blit(label, label_rect)
+
+
+def initialize_legend():
+    legend = Legend()
+    x, y = SIDE_SIZE + GRAPH_WIDTH + 30, TB_SIZE + 8
+    diff = 50
+
+    legend.add_node(LegendNode("Start node", x, y, START_COLOR))
+    legend.add_node(LegendNode("End node", x, y+diff, END_COLOR))
+    legend.add_node(LegendNode("Free node", x, y+diff*2, FREE_COLOR))
+    legend.add_node(LegendNode("Barrier node", x, y+diff*3, BARRIER_COLOR))
+    legend.add_node(LegendNode("Visited node", x, y+diff*4, VISITED_COLOR))
+    legend.add_node(LegendNode("Path node", x, y+diff*5, PATH_COLOR))
+    legend.add_node(LegendNode("Select a node", x,
+                    y + diff*5+40, action="LMB"))
+    legend.add_node(LegendNode("Unselect a node",  x,
+                               y+diff*6+20, action="RMB"))
+    legend.add_node(LegendNode("Graph size", x+33, y+diff*8+10))
+    legend.add_node(LegendNode("Animation speed", x, y+diff*9+38))
+
+    return legend
