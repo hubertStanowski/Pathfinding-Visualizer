@@ -11,17 +11,17 @@ def run_checks():
 
 
 # Draw the path between start and end
-def draw_path(path, graph, animation_speed):
+def draw_path(window, path, graph, animation_speed):
     length = len(path)
     prev = path[0]
     for node in path[1:]:
         run_checks()
         if not prev.is_start():
             prev.color = PATH_COLOR
-            prev.draw(update=True)
+            prev.draw(window, graph.gridlines, update=True)
         if not node.is_start() and not node.is_end():
             node.color = YELLOW
-            node.draw(update=True)
+            node.draw(window, graph.gridlines, update=True)
             prev = node
         # Delay based on length relative to GRAPH_SIZE and base delay
         delay = round(4 * graph.size / length * 6 *

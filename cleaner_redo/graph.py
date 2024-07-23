@@ -102,14 +102,14 @@ class GraphNode:
 
     def get_neighbors(self, graph):
         def valid(row, col):
-            return 0 <= row < self.size and 0 <= col < self.size and not graph.grid[row][col].is_barrier()
+            return 0 <= row < graph.size and 0 <= col < graph.size and not graph.grid[row][col].is_barrier()
 
         neighbors = []
         for dr, dc in DIRECTIONS:
             if valid(self.row+dr, self.col+dc):
                 neighbors.append(graph.grid[self.row+dr][self.col+dc])
 
-        return self.neighbors
+        return neighbors
 
     def pos(self):
         return self.row, self.col
