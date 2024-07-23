@@ -1,4 +1,5 @@
 from parameters import *
+from screen import *
 from graph import *
 from pathfinding import *
 from buttons import *
@@ -10,24 +11,7 @@ import pygame
 
 def main():
     def draw():
-        WINDOW.fill(BARRIER_COLOR)
-        graph.draw(WINDOW, update=False)
-        draw_legend(WINDOW)
-
-        for button in size_buttons.values():
-            button.draw(WINDOW)
-
-        for button in animation_buttons.values():
-            button.draw(WINDOW)
-
-        for button in control_buttons.values():
-            button.draw(WINDOW)
-
-        for button in pathfinding_buttons.values():
-            button.draw(WINDOW)
-
-        for button in maze_buttons.values():
-            button.draw(WINDOW)
+        screen.draw()
 
         pygame.display.update()
 
@@ -35,11 +19,10 @@ def main():
     WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Pathfinding Algorithms Visualizer")
 
-    animation_speed = "N"
-    graph = Graph(45, True)
-
-    pathfinding_buttons, maze_buttons, control_buttons, size_buttons, animation_buttons = initialize_buttons(
-        graph, animation_speed, graph.gridlines)
+    screen = Screen(WINDOW)
+    screen.add_graph(Graph(size=45))
+    screen.add_legend(initialize_legend())
+    initialize_buttons(screen)
 
     start, end = None, None
     path = None
@@ -57,40 +40,39 @@ def main():
 
             if pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()
-                row, col = graph.get_grid_pos(pos)
-                if 0 <= row < graph.size and 0 <= col < graph.size:
+                row, col = screen.graph.get_grid_pos(pos)
+                if 0 <= row < screen.graph.size and 0 <= col < screen.graph.size:
                     # Update the selected node
-                    node = graph.grid[row][col]
-                    if start is None:
+                    node = screen.graph.grid[row][col]
+                    if screen.graph.start is None:
                         node.set_start()
-                        start = node
-                    elif end is None and not node.is_start():
+                        screen.graph.set_start(node)
+                    elif screen.graph.end is None and not node.is_start():
                         node.set_end()
-                        end = node
+                        screen.graph.set_end(node)
                     else:
                         node.set_barrier()
-                    node.draw(WINDOW, graph.gridlines)
+                    node.draw(WINDOW, screen.graph.gridlines)
                 else:
                     # Run checks on the buttons
-                    for label, button in size_buttons.items():
+                    for label, button in screen.buttons["size_buttons"].items():
                         if button.rect.collidepoint(pos):
-                            graph = Graph(label, graph.gridlines)
-                            update_size_buttons(graph, size_buttons)
-                            start, end = None, None
+                            screen.add_graph(
+                                Graph(label, screen.graph.gridlines))
+                            update_size_buttons(screen)
                             path = None
 
-                    for label, button in animation_buttons.items():
+                    for label, button in screen.buttons["animation_buttons"].items():
                         if button.rect.collidepoint(pos):
-                            animation_speed = label
-                            update_animation_buttons(
-                                animation_speed, animation_buttons)
+                            screen.set_animation_speed(label)
+                            update_animation_buttons(screen)
 
-                    for label, button in control_buttons.items():
+                    for label, button in screen.buttons["control_buttons"].items():
                         if button.rect.collidepoint(pos):
                             if label == "RUN":
-                                if start and end and selected_algorithm and path is None:
-                                    path = search(
-                                        WINDOW, start, end, graph, selected_algorithm, animation_speed)
+                                if screen.graph.start and screen.graph.end and selected_algorithm and path is None:
+                                    # path = search(
+                                    #     WINDOW, start, end, graph, selected_algorithm, animation_speed)
                                     if not path:
                                         # Inform that no path has been found
                                         font = pygame.font.SysFont(FONT, 120)
@@ -104,50 +86,49 @@ def main():
                                         path = None
                                         print("PATH NOT FOUND")
                                     else:
-                                        draw_path(WINDOW, path, graph,
-                                                  animation_speed)
+                                        draw_path(WINDOW, path, screen.graph,
+                                                  screen.animation_speed)
                             elif label == "CLEAR":
                                 # Clear the graph (keep the barriers)
-                                graph.clear()
+                                screen.graph.clear()
                                 path = None
                             elif label == "RESET":
                                 # Reset the graph (create a completely new one)
-                                graph = Graph(graph.size, graph.gridlines)
-                                start, end = None, None
+                                screen.add_graph(
+                                    Graph(screen.graph.size, screen.graph.gridlines))
                                 path = None
                             elif not wait:
                                 # Toggle gridlines
-                                update_gridline_buttons(
-                                    graph.gridlines, control_buttons, toggle=True)
-                                graph.toggle_gridlines()
+                                update_gridline_buttons(screen, toggle=True)
+                                screen.graph.toggle_gridlines()
                                 wait = True
 
                     # Select a pathfinding algorithm
-                    for label, button in pathfinding_buttons.items():
+                    for label, button in screen.buttons["pathfinding_buttons"].items():
                         if button.rect.collidepoint(pos):
                             selected_algorithm = label
                             update_pathfinding_buttons(
-                                label, pathfinding_buttons)
+                                screen, selected_algorithm)
 
                     # Select and generate a maze
-                    for label, button in maze_buttons.items():
+                    for label, button in screen.buttons["maze_buttons"].items():
                         if button.rect.collidepoint(pos) and not wait:
-                            graph.clear(save_barriers=False)
+                            screen.graph.clear(save_barriers=False)
                             path = None
                             wait = True
                             # generate_maze(label)
 
             elif pygame.mouse.get_pressed()[2]:
-                row, col = graph.get_grid_pos(pygame.mouse.get_pos())
+                row, col = screen.graph.get_grid_pos(pygame.mouse.get_pos())
                 # Unselect the selected node
-                if 0 <= row < graph.size and 0 <= col < graph.size:
-                    node = graph.grid[row][col]
+                if 0 <= row < screen.graph.size and 0 <= col < screen.graph.size:
+                    node = screen.graph.grid[row][col]
                     if node.is_start():
-                        start = None
+                        screen.graph.reset_start()
                     elif node.is_end():
-                        end = None
+                        screen.graph.reset_end()
                     node.set_free()
-                    node.draw(WINDOW, graph.gridlines)
+                    node.draw(WINDOW, screen.graph.gridlines)
 
 
 if __name__ == "__main__":

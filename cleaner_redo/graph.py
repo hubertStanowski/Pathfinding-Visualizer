@@ -7,9 +7,11 @@ class Graph:
     def __init__(self, size, gridlines=False):
         self.gridlines = gridlines
         self.size = size
-        self.node_size = GRAPH_WIDTH // size  # Width and height of each node
+        self.node_size = GRAPH_WIDTH // size
         self.grid = [[GraphNode(row, col, self.node_size) for col in range(size)]
                      for row in range(size)]
+        self.start = None
+        self.end = None
 
     def draw(self, window, update=True):
         # Draws the graph and grid if toggled
@@ -61,6 +63,18 @@ class Graph:
 
     def toggle_gridlines(self):
         self.gridlines = not self.gridlines
+
+    def set_start(self, node):
+        self.start = node
+
+    def set_end(self, node):
+        self.end = node
+
+    def reset_start(self):
+        self.start = None
+
+    def reset_end(self):
+        self.end = None
 
 
 class GraphNode:
