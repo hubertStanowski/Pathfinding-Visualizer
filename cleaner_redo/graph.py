@@ -66,9 +66,11 @@ class Graph:
 
     def set_start(self, node):
         self.start = node
+        node.set_start()
 
     def set_end(self, node):
         self.end = node
+        node.set_end()
 
     def reset_start(self):
         self.start = None

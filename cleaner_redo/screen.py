@@ -1,3 +1,6 @@
+import pygame
+
+
 class Screen:
     def __init__(self, window=None, background=(0, 0, 0), animation_speed="N") -> None:
         self.window = window
@@ -18,13 +21,15 @@ class Screen:
                 for button in current_buttons.values():
                     button.draw(self.window)
 
+        pygame.display.update()
+
     def add_buttons(self, label, buttons):
         self.buttons[label] = buttons
 
-    def add_legend(self, legend):
+    def set_legend(self, legend):
         self.legend = legend
 
-    def add_graph(self, graph):
+    def set_graph(self, graph):
         self.graph = graph
 
     def set_animation_speed(self, new_animation_speed):

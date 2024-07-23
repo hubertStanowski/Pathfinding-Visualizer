@@ -10,28 +10,22 @@ import pygame
 
 
 def main():
-    def draw():
-        screen.draw()
-
-        pygame.display.update()
-
     pygame.init()
     WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Pathfinding Algorithms Visualizer")
 
     screen = Screen(WINDOW)
-    screen.add_graph(Graph(size=45))
-    screen.add_legend(initialize_legend())
+    screen.set_graph(Graph(size=45))
+    screen.set_legend(initialize_legend())
     initialize_buttons(screen)
 
-    start, end = None, None
     path = None
     selected_algorithm = None
     clock = pygame.time.Clock()
 
     while True:
         clock.tick(60)
-        draw()
+        screen.draw()
         wait = False    # For preventing multi-clicks
 
         for event in pygame.event.get():
@@ -44,20 +38,18 @@ def main():
                 if 0 <= row < screen.graph.size and 0 <= col < screen.graph.size:
                     # Update the selected node
                     node = screen.graph.grid[row][col]
-                    if screen.graph.start is None:
-                        node.set_start()
+                    if not screen.graph.start:
                         screen.graph.set_start(node)
-                    elif screen.graph.end is None and not node.is_start():
-                        node.set_end()
+                    elif not screen.graph.end and not node.is_start():
                         screen.graph.set_end(node)
                     else:
                         node.set_barrier()
-                    node.draw(WINDOW, screen.graph.gridlines)
+                    node.draw(screen.window, screen.graph.gridlines)
                 else:
                     # Run checks on the buttons
                     for label, button in screen.buttons["size_buttons"].items():
                         if button.rect.collidepoint(pos):
-                            screen.add_graph(
+                            screen.set_graph(
                                 Graph(label, screen.graph.gridlines))
                             update_size_buttons(screen)
                             path = None
@@ -80,13 +72,13 @@ def main():
                                             "PATH NOT FOUND!", True, RED)
                                         text_rect = label.get_rect(
                                             center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-                                        WINDOW.blit(label, text_rect)
+                                        screen.window.blit(label, text_rect)
                                         pygame.display.update()
                                         pygame.time.delay(500)
                                         path = None
                                         print("PATH NOT FOUND")
                                     else:
-                                        draw_path(WINDOW, path, screen.graph,
+                                        draw_path(screen.window, path, screen.graph,
                                                   screen.animation_speed)
                             elif label == "CLEAR":
                                 # Clear the graph (keep the barriers)
@@ -94,7 +86,7 @@ def main():
                                 path = None
                             elif label == "RESET":
                                 # Reset the graph (create a completely new one)
-                                screen.add_graph(
+                                screen.set_graph(
                                     Graph(screen.graph.size, screen.graph.gridlines))
                                 path = None
                             elif not wait:
@@ -128,7 +120,7 @@ def main():
                     elif node.is_end():
                         screen.graph.reset_end()
                     node.set_free()
-                    node.draw(WINDOW, screen.graph.gridlines)
+                    node.draw(screen.window, screen.graph.gridlines)
 
 
 if __name__ == "__main__":
