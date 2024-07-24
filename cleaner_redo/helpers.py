@@ -11,9 +11,6 @@ def run_checks():
                 "Exiting the program while executing an algorithm! (current settings will not be saved)")
 
 
-# def get_grid_size(window):
-#     return round(min(window.get_size()) * 0.9)
-
 def get_grid_size(window, graph):
     intended = round(min(window.get_size()) * 0.9)
     node_size = round(intended / graph.size)
@@ -35,10 +32,11 @@ def get_side_tab_size(window, graph):
     return round((window_width - get_grid_size(window, graph)) / 2)
 
 
-def get_big_button_size(window, graph):
-    window_width, window_height = window.get_size()
-    button_width = get_side_tab_size(window, graph) - (1/15 * window_width)
-    button_height = 7/100 * window_height
+def get_big_button_size(window):
+    small_button_size = get_small_button_size(window)
+
+    button_width = small_button_size * 5
+    button_height = 7/4 * small_button_size
 
     return button_width, button_height
 
@@ -54,6 +52,12 @@ def get_legend_font_size(window, graph):
 
 def get_small_button_font_size(window):
     return round(get_small_button_size(window) * 0.95)
+
+
+def get_big_button_font_size(window):
+    _, big_button_height = get_big_button_size(window)
+
+    return round(6/7 * big_button_height)
 
 
 # Draw the path between start and end
