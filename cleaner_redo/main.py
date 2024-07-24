@@ -36,7 +36,8 @@ def main():
             if event.type == pygame.VIDEORESIZE:
                 new_width, new_height = max(event.w, 850), max(event.h, 500)
                 ratio = new_height/new_width
-                if not (0.50 <= ratio <= 0.75):
+                # TODO Add changing to min when getting smaller and to max when getting bigger (prev dimensions compared to new)
+                if not (0.50 <= ratio <= 0.70):
                     new_width = max(new_width, new_height)
                     new_height = new_width * 2/3
 

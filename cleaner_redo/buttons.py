@@ -53,15 +53,18 @@ class SmallButton:
 
 def initialize_buttons(screen):
     window, graph = screen.window, screen.graph
+    window_width, window_height = window.get_size()
+    tb_size = get_tb_tab_size(window, graph)
+    side_size = get_side_tab_size(window, graph)
+    grid_size = get_grid_size(window, graph)
     small_button_size = get_small_button_size(window)
+    legend_font_size = get_legend_font_size(window, graph)
 
     # Initialize buttons for changing graph size
-    x = get_side_tab_size(window, graph) * (1.41) + get_grid_size(window,
-                                                                  graph) - small_button_size * 0.95
-
-    y = get_tb_tab_size(window, graph) + 9.8 * \
-        small_button_size + get_legend_font_size(window, graph)
+    x = side_size * (1.41) + grid_size - small_button_size * 0.95
+    y = tb_size + 10.1 * small_button_size + legend_font_size
     diff = small_button_size * 1.2
+
     size_buttons = {25: SmallButton(screen, "S", x, y),
                     45: SmallButton(screen, "M", x + diff, y),
                     75: SmallButton(screen, "L", x + diff*2, y)}
@@ -71,6 +74,7 @@ def initialize_buttons(screen):
 
     # Initialize buttons for changing animation speed
     y += small_button_size * 2
+
     animation_buttons = {"S": SmallButton(screen, "S", x, y),
                          "N": SmallButton(screen, "N", x + diff, y),
                          "F": SmallButton(screen, "F", x + diff*2, y)}
@@ -80,28 +84,28 @@ def initialize_buttons(screen):
 
     # Initialize buttons for graph management and view
     diff = 115
-    control_buttons = {"GRID OFF": BigButton("GRID OFF", WINDOW_WIDTH - (BUTTON_WIDTH + 50), TB_SIZE + 360, color=FREE_COLOR),
-                       "GRID ON": BigButton("GRID ON", WINDOW_WIDTH - (BUTTON_WIDTH + 50), TB_SIZE + 360, color=BLUE),
-                       "RUN": BigButton("RUN", WINDOW_WIDTH - (BUTTON_WIDTH + 50), TB_SIZE + 10 + diff*5, color=START_COLOR),
-                       "CLEAR": BigButton("CLEAR", WINDOW_WIDTH - (BUTTON_WIDTH + 50), TB_SIZE + 10 + diff*6, color=YELLOW),
-                       "RESET": BigButton("RESET", WINDOW_WIDTH - (BUTTON_WIDTH + 50), TB_SIZE + 10 + diff*7, color=END_COLOR)}
+    control_buttons = {"GRID OFF": BigButton("GRID OFF", window_width - (BUTTON_WIDTH + 50), tb_size + 360, color=FREE_COLOR),
+                       "GRID ON": BigButton("GRID ON", window_width - (BUTTON_WIDTH + 50), tb_size + 360, color=BLUE),
+                       "RUN": BigButton("RUN", window_width - (BUTTON_WIDTH + 50), tb_size + 10 + diff*5, color=START_COLOR),
+                       "CLEAR": BigButton("CLEAR", window_width - (BUTTON_WIDTH + 50), tb_size + 10 + diff*6, color=YELLOW),
+                       "RESET": BigButton("RESET", window_width - (BUTTON_WIDTH + 50), tb_size + 10 + diff*7, color=END_COLOR)}
 
     screen.add_buttons("control_buttons", control_buttons)
     update_gridline_buttons(screen)
 
     # Initialize buttons for pathfinding algorithms
-    pathfinding_buttons = {"BFS": BigButton("BFS", 50, TB_SIZE + 10),
-                           "DFS": BigButton("DFS", 50, TB_SIZE + 10 + diff),
-                           "Dijkstra's": BigButton("Dijkstra's", 50, TB_SIZE + 10 + diff*2),
-                           "A*": BigButton("A*", 50, TB_SIZE + 10 + diff*3)}
+    pathfinding_buttons = {"BFS": BigButton("BFS", 50, tb_size + 10),
+                           "DFS": BigButton("DFS", 50, tb_size + 10 + diff),
+                           "Dijkstra's": BigButton("Dijkstra's", 50, tb_size + 10 + diff*2),
+                           "A*": BigButton("A*", 50, tb_size + 10 + diff*3)}
 
     screen.add_buttons("pathfinding_buttons", pathfinding_buttons)
 
     # Initialize buttons for maze-generating algorithms
-    maze_buttons = {"Prim's": BigButton("Prim's", 50, TB_SIZE + 10 + diff*4, color=LIGHT_GREEN),
-                    "Division": BigButton("Division", 50, TB_SIZE + 10 + diff*5,  color=LIGHT_GREEN),
-                    "Backtrack": BigButton("Backtrack", 50, TB_SIZE + 10 + diff*6, color=LIGHT_GREEN),
-                    "Random": BigButton("Random", 50, TB_SIZE + 10 + diff*7,  color=LIGHT_GREEN)}
+    maze_buttons = {"Prim's": BigButton("Prim's", 50, tb_size + 10 + diff*4, color=LIGHT_GREEN),
+                    "Division": BigButton("Division", 50, tb_size + 10 + diff*5,  color=LIGHT_GREEN),
+                    "Backtrack": BigButton("Backtrack", 50, tb_size + 10 + diff*6, color=LIGHT_GREEN),
+                    "Random": BigButton("Random", 50, tb_size + 10 + diff*7,  color=LIGHT_GREEN)}
 
     screen.add_buttons("maze_buttons", maze_buttons)
 

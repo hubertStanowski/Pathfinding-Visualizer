@@ -80,7 +80,7 @@ def initialize_legend(screen):
     y += diff * 0.8
     legend.add_node(LegendNode("Unselect a node",  x,
                                y, action="RMB"))
-    y += 3*diff
+    y += 3.3*diff
     x += get_side_tab_size(window, graph) * 0.25 - \
         get_legend_font_size(window, graph) * 0.15
     legend.add_node(LegendNode("Graph size", x, y))
