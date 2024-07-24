@@ -27,6 +27,7 @@ def main():
         clock.tick(60)
         screen.draw()
         graph = screen.graph
+        old_width, old_height = screen.window.get_size()
         wait = False    # For preventing multi-clicks
 
         for event in pygame.event.get():
@@ -34,26 +35,12 @@ def main():
                 return 0
 
             if event.type == pygame.VIDEORESIZE:
-                new_width, new_height = max(event.w, 850), max(event.h, 500)
-                ratio = new_height/new_width
-                # TODO Add changing to min when getting smaller and to max when getting bigger (prev dimensions compared to new)
-                if not (0.53 <= ratio <= 0.70):
-                    new_width = max(new_width, new_height)
-                    new_height = new_width * 2/3
 
+                new_width, new_height = get_updated_screen_dimensions(
+                    (old_width, old_height), (event.w, event.h))
                 window = pygame.display.set_mode(
                     (new_width, new_height), pygame.RESIZABLE)
-
                 screen.resize_window(window)
-
-                #! TESTING
-                print("RATIO ", new_height/new_width)
-                print("WINDOW ", window.get_size())
-                print("GRID ", get_grid_size(window, graph))
-                print("TB ", get_tb_tab_size(window, graph))
-                print("SIDE ", get_side_tab_size(window, graph))
-                print("SMALL BUTTON ", get_small_button_size(window))
-                #! TESTING
 
             if pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()

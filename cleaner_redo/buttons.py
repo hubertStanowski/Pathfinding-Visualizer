@@ -55,13 +55,12 @@ class SmallButton:
 
 def initialize_buttons(screen):
     window, graph = screen.window, screen.graph
-    window_width, window_height = window.get_size()
     tb_size = get_tb_tab_size(window, graph)
     side_size = get_side_tab_size(window, graph)
     grid_size = get_grid_size(window, graph)
     small_button_size = get_small_button_size(window)
     legend_font_size = get_legend_font_size(window, graph)
-    big_button_width, big_button_height = get_big_button_size(window)
+    _, big_button_height = get_big_button_size(window)
 
     # Initialize buttons for changing graph size
     x = side_size * (1.41) + grid_size - small_button_size * 0.95

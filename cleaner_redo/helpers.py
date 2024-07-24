@@ -11,6 +11,29 @@ def run_checks():
                 "Exiting the program while executing an algorithm! (current settings will not be saved)")
 
 
+def get_updated_screen_dimensions(old_dimensions, new_dimensions):
+    old_width, old_height = old_dimensions
+    new_width, new_height = new_dimensions
+
+    new_width, new_height = max(new_width, 850), max(new_height, 567)
+    ratio = new_height/new_width
+    delta_width = new_width - old_width
+    delta_height = new_height - old_height
+
+    print(delta_width, delta_height)
+    negative = (delta_width+delta_height) < 0
+    print(negative)
+
+    # TODO Add changing to min when getting smaller and to max when getting bigger (prev dimensions compared to new)
+    if not (0.53 <= ratio <= 0.70):
+        if abs(delta_width) >= abs(delta_height):
+            new_height = new_width * 2/3
+        else:
+            new_width = 3/2 * new_height
+
+    return new_width, new_height
+
+
 def get_grid_size(window, graph):
     intended = round(min(window.get_size()) * 0.9)
     node_size = round(intended / graph.size)
@@ -57,7 +80,7 @@ def get_small_button_font_size(window):
 def get_big_button_font_size(window):
     _, big_button_height = get_big_button_size(window)
 
-    return round(6/7 * big_button_height)
+    return round(5/7 * big_button_height)
 
 
 # Draw the path between start and end
