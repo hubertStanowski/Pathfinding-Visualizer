@@ -37,7 +37,7 @@ def main():
                 new_width, new_height = max(event.w, 850), max(event.h, 500)
                 ratio = new_height/new_width
                 # TODO Add changing to min when getting smaller and to max when getting bigger (prev dimensions compared to new)
-                if not (0.50 <= ratio <= 0.70):
+                if not (0.53 <= ratio <= 0.70):
                     new_width = max(new_width, new_height)
                     new_height = new_width * 2/3
 
@@ -79,12 +79,14 @@ def main():
                         if button.rect.collidepoint(pos):
                             if label == "RUN":
                                 if graph.start and graph.end and selected_algorithm and not path:
+                                    screen.lock_window()
                                     path = graph.search(
                                         screen, selected_algorithm)
                                     if path:
                                         draw_path(screen, path)
                                     else:
                                         handle_no_path(screen)
+                                    screen.unlock_window()
                             elif label == "CLEAR":
                                 graph.clear()
                                 path = None
