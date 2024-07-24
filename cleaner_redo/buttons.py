@@ -27,6 +27,7 @@ class BigButton:
         window.blit(label, text_rect)
 
 
+# default scale x + 5
 class SmallButton:
     def __init__(self, label, x, y, color=FREE_COLOR):
         self.label = label

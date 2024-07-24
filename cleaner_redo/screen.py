@@ -14,8 +14,8 @@ class Screen:
         self.window.fill(self.background)
         if self.graph:
             self.graph.draw(self.window, update=False)
-        if self.legend:
-            self.legend.draw(self.window)
+            if self.legend:
+                self.legend.draw(self.window, self.graph)
         if self.buttons:
             for current_buttons in self.buttons.values():
                 for button in current_buttons.values():
@@ -27,6 +27,8 @@ class Screen:
         self.window = new_window
         if self.graph:
             self.graph.resize_nodes(new_window)
+            if self.legend:
+                self.legend = self.legend.resize(self)
 
     def add_buttons(self, label, buttons):
         self.buttons[label] = buttons
