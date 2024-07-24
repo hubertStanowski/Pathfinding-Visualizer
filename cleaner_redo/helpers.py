@@ -1,4 +1,4 @@
-from parameters import *
+from constants import *
 
 import pygame
 

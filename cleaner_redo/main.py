@@ -1,4 +1,4 @@
-from parameters import *
+from constants import *
 from screen import *
 from graph import *
 from helpers import *
@@ -40,17 +40,17 @@ def main():
                     new_width = max(new_width, new_height)
                     new_height = new_width * 2/3
 
-                print("RATIO ", new_height/new_width)
                 window = pygame.display.set_mode(
                     (new_width, new_height), pygame.RESIZABLE)
                 screen.resize_window(window)
+
                 #! TESTING
+                print("RATIO ", new_height/new_width)
                 print("WINDOW ", window.get_size())
                 print("GRID ", get_grid_size(window, graph))
                 print("TB ", get_tb_tab_size(window, graph))
                 print("SIDE ", get_side_tab_size(window, graph))
                 print("SMALL BUTTON ", get_small_button_size(window, graph))
-
                 #! TESTING
 
             if pygame.mouse.get_pressed()[0]:
