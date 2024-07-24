@@ -43,13 +43,17 @@ def get_big_button_size(window, graph):
     return button_width, button_height
 
 
-def get_small_button_size(window, graph):
+def get_small_button_size(window):
     _, window_height = window.get_size()
     return window_height * 0.042
 
 
 def get_legend_font_size(window, graph):
-    return round(get_small_button_size(window, graph) * 1/2 + get_side_tab_size(window, graph) * 0.03)
+    return round(get_small_button_size(window) * 1/2 + get_side_tab_size(window, graph) * 0.03)
+
+
+def get_small_button_font_size(window):
+    return round(get_small_button_size(window) * 0.95)
 
 
 # Draw the path between start and end

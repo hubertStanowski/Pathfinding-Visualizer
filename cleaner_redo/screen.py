@@ -1,4 +1,5 @@
 import pygame
+from buttons import initialize_buttons
 
 
 class Screen:
@@ -16,10 +17,10 @@ class Screen:
             self.graph.draw(self.window, update=False)
             if self.legend:
                 self.legend.draw(self.window, self.graph)
-        if self.buttons:
-            for current_buttons in self.buttons.values():
-                for button in current_buttons.values():
-                    button.draw(self.window)
+            if self.buttons:
+                for current_buttons in self.buttons.values():
+                    for button in current_buttons.values():
+                        button.draw(self.window, self.graph)
 
         pygame.display.update()
 
@@ -29,6 +30,8 @@ class Screen:
             self.graph.resize_nodes(new_window)
             if self.legend:
                 self.legend = self.legend.resize(self)
+            if self.buttons:
+                initialize_buttons(self)
 
     def add_buttons(self, label, buttons):
         self.buttons[label] = buttons

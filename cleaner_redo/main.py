@@ -42,6 +42,7 @@ def main():
 
                 window = pygame.display.set_mode(
                     (new_width, new_height), pygame.RESIZABLE)
+
                 screen.resize_window(window)
 
                 #! TESTING
@@ -50,7 +51,7 @@ def main():
                 print("GRID ", get_grid_size(window, graph))
                 print("TB ", get_tb_tab_size(window, graph))
                 print("SIDE ", get_side_tab_size(window, graph))
-                print("SMALL BUTTON ", get_small_button_size(window, graph))
+                print("SMALL BUTTON ", get_small_button_size(window))
                 #! TESTING
 
             if pygame.mouse.get_pressed()[0]:

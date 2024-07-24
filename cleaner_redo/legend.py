@@ -41,7 +41,7 @@ class LegendNode:
         if self.color is None:
             label_rect = pygame.Rect(self.x, self.y, label_width, label_height)
         else:
-            square_size = 3/4 * get_small_button_size(window, graph)
+            square_size = 3/4 * get_small_button_size(window)
             label_rect = pygame.Rect(
                 self.x+square_size, self.y + square_size/7, label_width, square_size)
             pygame.draw.rect(window, self.color,
@@ -55,11 +55,10 @@ class LegendNode:
 def initialize_legend(screen):
     legend = Legend()
     window, graph = screen.window, screen.graph
-    small_button_size = get_small_button_size(window, graph)
+    small_button_size = get_small_button_size(window)
     grid_size = get_grid_size(window, graph)
 
-    x = get_side_tab_size(window, graph) * (1.1) + \
-        grid_size
+    x = get_side_tab_size(window, graph) * (1.1) + grid_size
     y = get_tb_tab_size(window, graph)
 
     diff = small_button_size
@@ -81,14 +80,12 @@ def initialize_legend(screen):
     y += diff * 0.8
     legend.add_node(LegendNode("Unselect a node",  x,
                                y, action="RMB"))
-
-    # TODO CENTER THESE
     y += 3*diff
     x += get_side_tab_size(window, graph) * 0.25 - \
-        get_legend_font_size(window, graph) * 0.1
+        get_legend_font_size(window, graph) * 0.15
     legend.add_node(LegendNode("Graph size", x, y))
     y += 2*diff
-    x -= get_legend_font_size(window, graph)
+    x -= get_legend_font_size(window, graph)*1.05
     legend.add_node(LegendNode("Animation speed",
                     x, y))
 
