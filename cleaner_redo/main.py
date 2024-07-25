@@ -66,14 +66,12 @@ def main():
                         if button.rect.collidepoint(pos):
                             if label == "RUN":
                                 if graph.start and graph.end and selected_algorithm and not path:
-                                    screen.lock_window()
                                     path = graph.search(
                                         screen, selected_algorithm)
                                     if path:
                                         draw_path(screen, path)
                                     else:
                                         handle_no_path(screen)
-                                    screen.unlock_window()
                             elif label == "CLEAR":
                                 graph.clear()
                                 path = None

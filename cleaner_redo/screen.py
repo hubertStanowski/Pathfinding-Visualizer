@@ -32,14 +32,6 @@ class Screen:
                 self.legend = self.legend.resize(self)
             if self.buttons:
                 initialize_buttons(self)
-
-    def lock_window(self):
-        self.window = pygame.display.set_mode(self.window.get_size())
-        self.draw()
-
-    def unlock_window(self):
-        self.window = pygame.display.set_mode(
-            self.window.get_size(), pygame.RESIZABLE)
         self.draw()
 
     def add_buttons(self, label, buttons):

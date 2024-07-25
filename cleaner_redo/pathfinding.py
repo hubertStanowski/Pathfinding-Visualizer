@@ -11,7 +11,7 @@ def BFS(screen):
     queue = deque([(graph.start, [graph.start])])
 
     while queue:
-        run_checks()
+        run_checks(screen)
 
         current, path = queue.popleft()
         for neighbor in current.get_neighbors(graph):
@@ -33,7 +33,7 @@ def DFS(screen):
     visited = []
 
     while stack:
-        run_checks()
+        run_checks(screen)
 
         current = stack.pop()
         current.set_visited()

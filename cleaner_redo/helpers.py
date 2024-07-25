@@ -4,11 +4,19 @@ import pygame
 
 
 # Helper function for handling events within algorithms
-def run_checks():
+def run_checks(screen):
+    old_width, old_height = screen.window.get_size()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             raise Exception(
                 "Exiting the program while executing an algorithm! (current settings will not be saved)")
+
+        if event.type == pygame.VIDEORESIZE:
+            new_width, new_height = get_updated_screen_dimensions(
+                (old_width, old_height), (event.w, event.h))
+            window = pygame.display.set_mode(
+                (new_width, new_height), pygame.RESIZABLE)
+            screen.resize_window(window)
 
 
 def get_updated_screen_dimensions(old_dimensions, new_dimensions):
@@ -20,11 +28,6 @@ def get_updated_screen_dimensions(old_dimensions, new_dimensions):
     delta_width = new_width - old_width
     delta_height = new_height - old_height
 
-    print(delta_width, delta_height)
-    negative = (delta_width+delta_height) < 0
-    print(negative)
-
-    # TODO Add changing to min when getting smaller and to max when getting bigger (prev dimensions compared to new)
     if not (0.53 <= ratio <= 0.70):
         if abs(delta_width) >= abs(delta_height):
             new_height = new_width * 2/3
@@ -88,7 +91,7 @@ def draw_path(screen, path):
     graph = screen.graph
     prev = path[0]
     for node in path[1:]:
-        run_checks()
+        run_checks(screen)
         if not prev.is_start():
             prev.color = PATH_COLOR
             prev.draw(screen.window, graph, update=True)
