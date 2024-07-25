@@ -35,7 +35,7 @@ def main():
                 return 0
 
             if event.type == pygame.VIDEORESIZE:
-
+                # TODO add keeping algorithm selection after resizing
                 new_width, new_height = get_updated_screen_dimensions(
                     (old_width, old_height), (event.w, event.h))
                 window = pygame.display.set_mode(

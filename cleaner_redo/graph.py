@@ -32,6 +32,8 @@ class Graph:
             return BFS(screen)
         elif selected_algorithm == "DFS":
             return DFS(screen)
+        elif selected_algorithm == "Dijkstra's":
+            return dijkstras(screen)
 
     def get_grid_pos(self, window, pos):
         """
@@ -95,6 +97,9 @@ class Graph:
     def is_valid_node(self, row, col):
         return 0 <= row < self.size and 0 <= col < self.size
 
+    def get_start(self):
+        return self.start
+
     def set_start(self, node):
         self.start = node
         node.set_start()
@@ -115,6 +120,7 @@ class GraphNode:
         self.row = row
         self.col = col
         self.color = FREE_COLOR
+        self.path = []
         self.source_dist = inf  # g score in a*
         self.target_dist = inf  # f score in a*
 
@@ -157,6 +163,24 @@ class GraphNode:
                 neighbors.append(graph.grid[self.row+dr][self.col+dc])
 
         return neighbors
+
+    def get_path(self):
+        return self.path
+
+    def get_source_dist(self):
+        return self.source_dist
+
+    def get_target_dist(self):
+        return self.target_dist
+
+    def update_path(self, new_path):
+        self.path = new_path
+
+    def update_source_dist(self, new_source_dist):
+        self.source_dist = new_source_dist
+
+    def update_target_dist(self, new_target_dist):
+        self.target_dist = new_target_dist
 
     def pos(self):
         return self.row, self.col
