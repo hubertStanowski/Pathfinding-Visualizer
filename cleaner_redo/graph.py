@@ -34,6 +34,8 @@ class Graph:
             return DFS(screen)
         elif selected_algorithm == "Dijkstra's":
             return dijkstras(screen)
+        elif selected_algorithm == "A*":
+            return astar(screen)
 
     def get_grid_pos(self, window, pos):
         """
@@ -99,6 +101,9 @@ class Graph:
 
     def get_start(self):
         return self.start
+
+    def get_end(self):
+        return self.end
 
     def set_start(self, node):
         self.start = node
@@ -167,6 +172,9 @@ class GraphNode:
     def get_path(self):
         return self.path
 
+    def get_parent(self):
+        return self.path[-1]
+
     def get_source_dist(self):
         return self.source_dist
 
@@ -176,13 +184,19 @@ class GraphNode:
     def update_path(self, new_path):
         self.path = new_path
 
+    def update_parent(self, new_parent):
+        if self.path:
+            self.path.pop()
+
+        self.path.append(new_parent)
+
     def update_source_dist(self, new_source_dist):
         self.source_dist = new_source_dist
 
     def update_target_dist(self, new_target_dist):
         self.target_dist = new_target_dist
 
-    def pos(self):
+    def get_pos(self):
         return self.row, self.col
 
     def set_start(self):
@@ -195,7 +209,7 @@ class GraphNode:
         self.color = FREE_COLOR
 
     def set_barrier(self):
-        if self.is_free():
+        if not self.is_end() and not self.is_start():
             self.color = BARRIER_COLOR
 
     def set_visited(self):
