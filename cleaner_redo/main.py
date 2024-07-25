@@ -19,7 +19,6 @@ def main():
     screen.set_legend(initialize_legend(screen))
     initialize_buttons(screen)
 
-    path = None
     selected_algorithm = None
     clock = pygame.time.Clock()
 
@@ -55,7 +54,6 @@ def main():
                             screen.set_graph(
                                 Graph(window, label, graph.gridlines))
                             update_size_buttons(screen)
-                            path = None
 
                     for label, button in screen.buttons["animation_buttons"].items():
                         if button.rect.collidepoint(pos):
@@ -65,7 +63,9 @@ def main():
                     for label, button in screen.buttons["control_buttons"].items():
                         if button.rect.collidepoint(pos):
                             if label == "RUN":
-                                if graph.start and graph.end and selected_algorithm and not path:
+                                if graph.start and graph.end and selected_algorithm:
+                                    graph.clear()
+                                    graph.draw(screen.window)
                                     path = graph.search(
                                         screen, selected_algorithm)
                                     if path:
@@ -74,11 +74,9 @@ def main():
                                         handle_no_path(screen)
                             elif label == "CLEAR":
                                 graph.clear()
-                                path = None
                             elif label == "RESET":
                                 screen.set_graph(
                                     Graph(window, graph.size, graph.gridlines))
-                                path = None
                             elif not wait:
                                 update_gridline_buttons(screen, toggle=True)
                                 graph.toggle_gridlines()
@@ -93,7 +91,6 @@ def main():
                     for label, button in screen.buttons["maze_buttons"].items():
                         if button.rect.collidepoint(pos) and not wait:
                             graph.clear(save_barriers=False)
-                            path = None
                             wait = True
                             # generate_maze(label)
 
