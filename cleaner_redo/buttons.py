@@ -1,10 +1,12 @@
 from constants import *
 from helpers import *
+
 import pygame
+from math import inf
 
 
 class BigButton:
-    def __init__(self, screen, label, x, y, color=FREE_COLOR,  visible=True):
+    def __init__(self, screen, label, x, y, color=FREE_COLOR,  visible=True, cooldown=0):
         self.label = label
         self.x = x
         self.y = y
@@ -13,9 +15,11 @@ class BigButton:
             x, y, self.width, self.height)
         self.color = color
         self.visible = visible
+        self.cooldown = cooldown
+        self.last_click_time = -inf
 
     def draw(self, window):
-        if not self.visible:
+        if not self.is_visible():
             return
 
         pygame.draw.rect(window, self.color, self.rect)
@@ -28,6 +32,17 @@ class BigButton:
 
     def is_visible(self):
         return self.visible
+
+    def clicked(self, pos):
+        valid = (self.is_visible() and self.rect.collidepoint(pos))
+        if self.cooldown:
+            current_time = pygame.time.get_ticks()
+            valid = valid and (
+                current_time-self.last_click_time) > self.cooldown
+            if valid:
+                self.last_click_time = current_time
+
+        return valid
 
 
 class SmallButton:
@@ -53,6 +68,9 @@ class SmallButton:
 
     def unselect(self):
         self.color = FREE_COLOR
+
+    def clicked(self, pos):
+        return self.rect.collidepoint(pos)
 
 
 def initialize_buttons(screen):
@@ -92,16 +110,16 @@ def initialize_buttons(screen):
     diff_grid = small_button_size * 4.3 + legend_font_size + diff*1.7
     diff = big_button_height + small_button_size*0.5
 
-    action_buttons = {"RUN": BigButton(screen, "RUN", x, y, color=START_COLOR),
-                      "FINISH": BigButton(screen, "FINISH", x, y, color=VISITED_COLOR, visible=False),
+    action_buttons = {"RUN": BigButton(screen, "RUN", x, y, color=START_COLOR, cooldown=DEFAULT_BUTTON_COOLDOWN),
+                      "FINISH": BigButton(screen, "FINISH", x, y, color=VISITED_COLOR, visible=False, cooldown=DEFAULT_BUTTON_COOLDOWN),
                       "CLEAR": BigButton(screen, "CLEAR", x, y + diff, color=YELLOW),
                       "RESET": BigButton(screen, "RESET", x, y + diff*2, color=END_COLOR)}
 
     screen.add_buttons("action_buttons", action_buttons)
 
     # Initialize gridline buttons
-    gridline_buttons = {"GRID OFF": BigButton(screen, "GRID OFF", x, y-diff_grid, color=FREE_COLOR),
-                        "GRID ON": BigButton(screen, "GRID ON", x, y-diff_grid, color=BLUE)}
+    gridline_buttons = {"GRID OFF": BigButton(screen, "GRID OFF", x, y-diff_grid, color=FREE_COLOR, cooldown=DEFAULT_BUTTON_COOLDOWN),
+                        "GRID ON": BigButton(screen, "GRID ON", x, y-diff_grid, color=BLUE, cooldown=DEFAULT_BUTTON_COOLDOWN)}
 
     screen.add_buttons("gridline_buttons", gridline_buttons)
     update_gridline_buttons(screen)

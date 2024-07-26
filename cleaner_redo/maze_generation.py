@@ -1,11 +1,10 @@
 from constants import *
 from helpers import run_checks
 
-import pygame
 from random import choice, shuffle
 
 
-# Recurisve backtracker maze generator
+# Recursive backtracker maze generator
 def backtrack(screen, row, col):
     graph = screen.graph
     grid = graph.grid

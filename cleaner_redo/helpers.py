@@ -22,18 +22,18 @@ def run_checks(screen):
             pos = pygame.mouse.get_pos()
             finish_button = screen.buttons["action_buttons"]["FINISH"]
 
-            if finish_button.rect.collidepoint(pos) and finish_button.is_visible():
+            if finish_button.clicked(pos):
                 screen.animate = False
 
             for button in screen.buttons["gridline_buttons"].values():
-                if button.rect.collidepoint(pos):
+                if button.clicked(pos):
                     update_gridline_buttons(screen, toggle=True)
                     screen.graph.toggle_gridlines()
                     screen.draw()
                     break
 
             for label, button in screen.buttons["animation_buttons"].items():
-                if button.rect.collidepoint(pos):
+                if button.clicked(pos):
                     screen.set_animation_speed(label)
                     update_animation_buttons(screen)
                     screen.draw()
@@ -158,7 +158,7 @@ def update_animation_buttons(screen):
             button.unselect()
 
 
-def update_gridline_buttons(screen, toggle=False):
+def update_gridline_buttons(screen):
     grid_on = screen.buttons["gridline_buttons"]["GRID ON"]
     grid_off = screen.buttons["gridline_buttons"]["GRID OFF"]
     if screen.graph.gridlines:
@@ -168,10 +168,17 @@ def update_gridline_buttons(screen, toggle=False):
         grid_on.visible = False
         grid_off.visible = True
 
-    if toggle:
-        screen.graph.gridline = not screen.graph.gridlines
-        grid_on.visible = not grid_on.visible
-        grid_off.visible = not grid_off.visible
+
+def toggle_gridline_buttons(screen):
+    grid_on = screen.buttons["gridline_buttons"]["GRID ON"]
+    grid_off = screen.buttons["gridline_buttons"]["GRID OFF"]
+
+    screen.graph.gridline = not screen.graph.gridlines
+    grid_on.visible = not grid_on.visible
+    grid_off.visible = not grid_off.visible
+    current_time = pygame.time.get_ticks()
+    grid_on.last_click_time = current_time
+    grid_off.last_click_time = current_time
 
 
 def update_pathfinding_buttons(screen):
@@ -183,5 +190,10 @@ def update_pathfinding_buttons(screen):
 
 
 def toggle_run_finish_buttons(screen):
-    screen.buttons["action_buttons"]["RUN"].visible = not screen.buttons["action_buttons"]["RUN"].visible
-    screen.buttons["action_buttons"]["FINISH"].visible = not screen.buttons["action_buttons"]["FINISH"].visible
+    run, finish = screen.buttons["action_buttons"]["RUN"], screen.buttons["action_buttons"]["FINISH"]
+    run.visible = not run.visible
+    finish.visible = not finish.visible
+
+    current_time = pygame.time.get_ticks()
+    run.last_click_time = current_time
+    finish.last_click_time = current_time

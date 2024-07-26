@@ -2,7 +2,7 @@ from constants import *
 from screen import *
 from graph import *
 from helpers import *
-from buttons import *
+from buttons import initialize_buttons
 from legend import initialize_legend
 
 import pygame
@@ -30,7 +30,7 @@ def main():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return 0
+                return
 
             if event.type == pygame.VIDEORESIZE:
                 new_width, new_height = get_updated_screen_dimensions(
@@ -48,18 +48,18 @@ def main():
                     node.draw(screen)
                 else:
                     for label, button in screen.buttons["size_buttons"].items():
-                        if button.rect.collidepoint(pos):
+                        if button.clicked(pos):
                             screen.set_graph(
                                 Graph(window, label, graph.gridlines))
                             update_size_buttons(screen)
 
                     for label, button in screen.buttons["animation_buttons"].items():
-                        if button.rect.collidepoint(pos):
+                        if button.clicked(pos):
                             screen.set_animation_speed(label)
                             update_animation_buttons(screen)
 
                     for label, button in screen.buttons["action_buttons"].items():
-                        if button.rect.collidepoint(pos):
+                        if button.clicked(pos):
                             if label == "RUN":
                                 if graph.start and graph.end and screen.selected_algorithm:
                                     toggle_run_finish_buttons(screen)
@@ -71,6 +71,7 @@ def main():
                                         draw_path(screen, path)
                                     else:
                                         handle_no_path(screen)
+
                             elif label == "CLEAR":
                                 graph.clear()
                             elif label == "RESET":
@@ -78,24 +79,22 @@ def main():
                                     Graph(window, graph.size, graph.gridlines))
 
                     for button in screen.buttons["gridline_buttons"].values():
-                        if button.rect.collidepoint(pos):
-                            update_gridline_buttons(screen, toggle=True)
+                        if button.clicked(pos):
+                            toggle_gridline_buttons(screen)
                             graph.toggle_gridlines()
-                            break
 
                     for label, button in screen.buttons["pathfinding_buttons"].items():
-                        if button.rect.collidepoint(pos):
+                        if button.clicked(pos):
                             screen.selected_algorithm = label
                             update_pathfinding_buttons(screen)
 
                     for label, button in screen.buttons["maze_buttons"].items():
-                        if button.rect.collidepoint(pos):
+                        if button.clicked(pos):
                             toggle_run_finish_buttons(screen)
                             screen.draw()
                             graph.generate_maze(screen, label)
                             toggle_run_finish_buttons(screen)
                             screen.draw()
-                            break
 
             elif pygame.mouse.get_pressed()[2]:
                 row, col = graph.get_grid_pos(window, pygame.mouse.get_pos())

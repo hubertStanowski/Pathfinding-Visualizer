@@ -17,12 +17,12 @@ class Graph:
         self.start = None
         self.end = None
 
-    def draw(self, screen):
+    def draw(self, screen, update=False):
         # Draws the graph and gridlines if toggled
         for row in self.grid:
             for node in row:
                 node.draw(screen)
-        if screen.animate:
+        if screen.animate or update:
             pygame.display.update()
 
     def resize_nodes(self, window):
@@ -30,6 +30,9 @@ class Graph:
 
     def search(self, screen):
         self.clear()
+        screen.animate = False
+        self.draw(screen, update=True)
+        screen.animate = True
         if screen.selected_algorithm == "BFS":
             return BFS(screen)
         elif screen.selected_algorithm == "DFS":
