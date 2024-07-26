@@ -26,6 +26,9 @@ class BigButton:
             self.x + self.width // 2, self.y + self.height // 2))
         window.blit(label, text_rect)
 
+    def is_visible(self):
+        return self.visible
+
 
 # default scale x + 5
 class SmallButton:
@@ -93,6 +96,7 @@ def initialize_buttons(screen):
     control_buttons = {"GRID OFF": BigButton(screen, "GRID OFF", x, y-diff_grid, color=FREE_COLOR),
                        "GRID ON": BigButton(screen, "GRID ON", x, y-diff_grid, color=BLUE),
                        "RUN": BigButton(screen, "RUN", x, y, color=START_COLOR),
+                       "FINISH": BigButton(screen, "FINISH", x, y, color=VISITED_COLOR, visible=False),
                        "CLEAR": BigButton(screen, "CLEAR", x, y + diff, color=YELLOW),
                        "RESET": BigButton(screen, "RESET", x, y + diff*2, color=END_COLOR)}
 
@@ -147,6 +151,7 @@ def update_gridline_buttons(screen, toggle=False):
         grid_off.visible = True
 
     if toggle:
+        screen.graph.gridline = not screen.graph.gridlines
         grid_on.visible = not grid_on.visible
         grid_off.visible = not grid_off.visible
 
@@ -157,3 +162,8 @@ def update_pathfinding_buttons(screen, selected):
             button.color = FREE_COLOR
         else:
             button.color = PATH_COLOR
+
+
+def toggle_run_finish_buttons(screen):
+    screen.buttons["control_buttons"]["RUN"].visible = not screen.buttons["control_buttons"]["RUN"].visible
+    screen.buttons["control_buttons"]["FINISH"].visible = not screen.buttons["control_buttons"]["FINISH"].visible

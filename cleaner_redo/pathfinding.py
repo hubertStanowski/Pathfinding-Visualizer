@@ -22,9 +22,11 @@ def BFS(screen):
                     return path + [neighbor]
                 else:
                     neighbor.set_visited()
-                    neighbor.draw(screen.window, graph)
-                    pygame.time.delay(
-                        DELAYS[screen.animation_speed][graph.size])
+                    neighbor.draw(screen.window, graph,
+                                  update=screen.animate)
+                    if screen.animate:
+                        pygame.time.delay(
+                            DELAYS[screen.animation_speed][graph.size])
                     queue.append((neighbor, path + [neighbor]))
 
 
@@ -41,8 +43,9 @@ def DFS(screen):
         current.set_visited()
         visited.append(current)
 
-        current.draw(screen.window, graph)
-        pygame.time.delay(DELAYS[screen.animation_speed][graph.size])
+        current.draw(screen.window, graph, update=screen.animate)
+        if screen.animate:
+            pygame.time.delay(DELAYS[screen.animation_speed][graph.size])
 
         if current.is_end():
             return visited
@@ -65,8 +68,9 @@ def dijkstras(screen):
 
         current = heappop(to_visit)
         current.set_visited()
-        current.draw(screen.window, graph)
-        pygame.time.delay(DELAYS[screen.animation_speed][graph.size])
+        current.draw(screen.window, graph, update=screen.animate)
+        if screen.animate:
+            pygame.time.delay(DELAYS[screen.animation_speed][graph.size])
 
         for neighbor in current.get_neighbors(graph):
             new_dist = current.get_source_dist() + 1
@@ -96,8 +100,9 @@ def astar(screen):
 
         current = heappop(open_list)
         current.set_visited()
-        current.draw(screen.window, graph)
-        pygame.time.delay(DELAYS[screen.animation_speed][graph.size])
+        current.draw(screen.window, graph, update=screen.animate)
+        if screen.animate:
+            pygame.time.delay(DELAYS[screen.animation_speed][graph.size])
 
         if current.is_end():
             path = [end]
@@ -121,9 +126,11 @@ def astar(screen):
                 if neighbor not in open_list:
                     heappush(open_list, neighbor)
                     neighbor.set_visited()
-                    neighbor.draw(screen.window, graph)
-                    pygame.time.delay(
-                        DELAYS[screen.animation_speed][graph.size])
+                    neighbor.draw(screen.window, graph,
+                                  update=screen.animate)
+                    if screen.animate:
+                        pygame.time.delay(
+                            DELAYS[screen.animation_speed][graph.size])
 
 
 # Heuristic function for A* (Manhattan distance)

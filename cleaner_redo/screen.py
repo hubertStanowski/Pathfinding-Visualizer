@@ -7,11 +7,13 @@ class Screen:
         self.window = window
         self.background = background
         self.animation_speed = animation_speed
+        self.animate = True
         self.buttons = {}
         self.legend = None
         self.graph = None
 
     def draw(self):
+        self.animate = True
         self.window.fill(self.background)
         if self.graph:
             self.graph.draw(self.window, update=False)

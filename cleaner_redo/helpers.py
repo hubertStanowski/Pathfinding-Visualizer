@@ -5,6 +5,8 @@ import pygame
 
 # Helper function for handling events within algorithms
 def run_checks(screen):
+    # TODO allow for toggling gridlines while running algorithms
+    # TODO allow for changing animation speed while running algorithms
     old_width, old_height = screen.window.get_size()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -17,6 +19,12 @@ def run_checks(screen):
             window = pygame.display.set_mode(
                 (new_width, new_height), pygame.RESIZABLE)
             screen.resize_window(window)
+
+        if pygame.mouse.get_pressed()[0]:
+            pos = pygame.mouse.get_pos()
+            finish_button = screen.buttons["control_buttons"]["FINISH"]
+            if finish_button.rect.collidepoint(pos) and finish_button.is_visible():
+                screen.animate = False
 
 
 def get_updated_screen_dimensions(old_dimensions, new_dimensions):

@@ -65,9 +65,12 @@ def main():
                             if label == "RUN":
                                 if graph.start and graph.end and selected_algorithm:
                                     graph.clear()
-                                    graph.draw(screen.window)
+                                    toggle_run_finish_buttons(screen)
+                                    screen.draw()
                                     path = graph.search(
                                         screen, selected_algorithm)
+                                    toggle_run_finish_buttons(screen)
+                                    screen.draw()
                                     if path:
                                         draw_path(screen, path)
                                     else:
@@ -77,7 +80,7 @@ def main():
                             elif label == "RESET":
                                 screen.set_graph(
                                     Graph(window, graph.size, graph.gridlines))
-                            elif not wait:
+                            elif (label == "GRID OFF" or label == "GRID ON") and not wait:
                                 update_gridline_buttons(screen, toggle=True)
                                 graph.toggle_gridlines()
                                 wait = True
