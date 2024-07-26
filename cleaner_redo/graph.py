@@ -44,6 +44,10 @@ class Graph:
         self.draw(screen.window)
         if selected_maze == "Random":
             random_maze(screen)
+        elif selected_maze == "Backtrack":
+            self.fill()
+            self.draw(screen.window)
+            backtrack(screen, 1, 1)
 
     def get_grid_pos(self, window, pos):
         """
@@ -104,8 +108,8 @@ class Graph:
 
         node.set_free()
 
-    def is_valid_node(self, row, col):
-        return 0 <= row < self.size and 0 <= col < self.size
+    def is_valid_node(self, row, col, offset=0):
+        return offset <= row < (self.size - offset) and offset <= col < (self.size - offset)
 
     def get_start(self):
         return self.start
