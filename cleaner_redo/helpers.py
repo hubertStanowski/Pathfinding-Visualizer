@@ -174,9 +174,9 @@ def update_gridline_buttons(screen, toggle=False):
         grid_off.visible = not grid_off.visible
 
 
-def update_pathfinding_buttons(screen, selected):
+def update_pathfinding_buttons(screen):
     for label, button in screen.buttons["pathfinding_buttons"].items():
-        if label != selected:
+        if label != screen.selected_algorithm:
             button.color = FREE_COLOR
         else:
             button.color = PATH_COLOR

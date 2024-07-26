@@ -10,16 +10,16 @@ import pygame
 
 def main():
     pygame.init()
+    display_info = pygame.display.Info()
     window = pygame.display.set_mode(
-        (1500, 1000), pygame.RESIZABLE)
-    pygame.display.set_caption("Pathfinding Algorithms Visualizer")
+        (display_info.current_w, display_info.current_h), pygame.RESIZABLE)
+    pygame.display.set_caption("Pathfinding Visualizer")
 
     screen = Screen(window)
     screen.set_graph(Graph(window, size=45))
     screen.set_legend(initialize_legend(screen))
     initialize_buttons(screen)
 
-    selected_algorithm = None
     clock = pygame.time.Clock()
 
     while True:
@@ -33,7 +33,6 @@ def main():
                 return 0
 
             if event.type == pygame.VIDEORESIZE:
-                # TODO add keeping algorithm selection after resizing
                 new_width, new_height = get_updated_screen_dimensions(
                     (old_width, old_height), (event.w, event.h))
                 window = pygame.display.set_mode(
@@ -62,12 +61,11 @@ def main():
                     for label, button in screen.buttons["action_buttons"].items():
                         if button.rect.collidepoint(pos):
                             if label == "RUN":
-                                if graph.start and graph.end and selected_algorithm:
+                                if graph.start and graph.end and screen.selected_algorithm:
                                     graph.clear()
                                     toggle_run_finish_buttons(screen)
                                     screen.draw()
-                                    path = graph.search(
-                                        screen, selected_algorithm)
+                                    path = graph.search(screen)
                                     toggle_run_finish_buttons(screen)
                                     screen.draw()
                                     if path:
@@ -88,9 +86,8 @@ def main():
 
                     for label, button in screen.buttons["pathfinding_buttons"].items():
                         if button.rect.collidepoint(pos):
-                            selected_algorithm = label
-                            update_pathfinding_buttons(
-                                screen, selected_algorithm)
+                            screen.selected_algorithm = label
+                            update_pathfinding_buttons(screen)
 
                     for label, button in screen.buttons["maze_buttons"].items():
                         if button.rect.collidepoint(pos):

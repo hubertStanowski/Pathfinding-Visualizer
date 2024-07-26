@@ -11,6 +11,7 @@ class Screen:
         self.buttons = {}
         self.legend = None
         self.graph = None
+        self.selected_algorithm = None
 
     def draw(self):
         self.animate = True
@@ -34,6 +35,7 @@ class Screen:
                 self.legend = self.legend.resize(self)
             if self.buttons:
                 initialize_buttons(self)
+
         self.draw()
 
     def add_buttons(self, label, buttons):

@@ -30,7 +30,6 @@ class BigButton:
         return self.visible
 
 
-# default scale x + 5
 class SmallButton:
     def __init__(self, screen, label, x, y, color=FREE_COLOR):
         self.label = label
@@ -126,3 +125,4 @@ def initialize_buttons(screen):
                            "A*": BigButton(screen, "A*", x, y - diff*4)}
 
     screen.add_buttons("pathfinding_buttons", pathfinding_buttons)
+    update_pathfinding_buttons(screen)

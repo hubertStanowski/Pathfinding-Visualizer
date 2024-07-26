@@ -27,14 +27,14 @@ class Graph:
     def resize_nodes(self, window):
         self.node_size = round(get_grid_size(window, self) / self.size)
 
-    def search(self, screen, selected_algorithm):
-        if selected_algorithm == "BFS":
+    def search(self, screen):
+        if screen.selected_algorithm == "BFS":
             return BFS(screen)
-        elif selected_algorithm == "DFS":
+        elif screen.selected_algorithm == "DFS":
             return DFS(screen)
-        elif selected_algorithm == "Dijkstra's":
+        elif screen.selected_algorithm == "Dijkstra's":
             return dijkstras(screen)
-        elif selected_algorithm == "A*":
+        elif screen.selected_algorithm == "A*":
             return astar(screen)
 
     def get_grid_pos(self, window, pos):
