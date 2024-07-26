@@ -12,18 +12,23 @@ class Screen:
         self.legend = None
         self.graph = None
         self.selected_algorithm = None
+        self.delay_multiplier = 1
 
     def draw(self):
-        self.animate = True
+        self.animate = False
         self.window.fill(self.background)
+
         if self.graph:
-            self.graph.draw(self.window, update=False)
+            self.graph.draw(self)
             if self.legend:
                 self.legend.draw(self.window, self.graph)
+
         if self.buttons:
             for current_buttons in self.buttons.values():
                 for button in current_buttons.values():
                     button.draw(self.window)
+
+        self.animate = True
 
         pygame.display.update()
 
@@ -37,6 +42,9 @@ class Screen:
                 initialize_buttons(self)
 
         self.draw()
+
+    def reset_delay_multiplier(self):
+        self.delay_multiplier = 1
 
     def add_buttons(self, label, buttons):
         self.buttons[label] = buttons

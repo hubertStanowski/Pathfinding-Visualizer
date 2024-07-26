@@ -45,7 +45,7 @@ def main():
                 if graph.is_valid_node(row, col):
                     node = graph.grid[row][col]
                     graph.select_node(node)
-                    node.draw(window, graph)
+                    node.draw(screen)
                 else:
                     for label, button in screen.buttons["size_buttons"].items():
                         if button.rect.collidepoint(pos):
@@ -102,7 +102,7 @@ def main():
                 if graph.is_valid_node(row, col):
                     node = graph.grid[row][col]
                     graph.unselect_node(node)
-                    node.draw(window, graph)
+                    node.draw(screen)
 
 
 if __name__ == "__main__":

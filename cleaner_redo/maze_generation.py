@@ -12,9 +12,7 @@ def backtrack(screen, row, col):
     current = grid[row][col]
     if current.is_barrier():
         current.set_free()
-        current.draw(screen.window, graph, update=screen.animate)
-        if screen.animate:
-            pygame.time.delay(DELAYS[screen.animation_speed][graph.size])
+        current.draw(screen)
 
     valid_directions = DIRECTIONS.copy()
     shuffle(valid_directions)
@@ -35,10 +33,7 @@ def backtrack(screen, row, col):
                     link = grid[new_row][new_col]
                     if link.is_barrier():
                         link.set_free()
-                        link.draw(screen.window, graph, update=screen.animate)
-                        if screen.animate:
-                            pygame.time.delay(
-                                DELAYS[screen.animation_speed][graph.size])
+                        link.draw(screen)
 
                 # Recursive call
                 backtrack(screen, far_neighbor.row, far_neighbor.col)
@@ -54,7 +49,4 @@ def random_maze(screen):
             node = screen.graph.grid[row][col]
             if choice([True, False, False]):
                 node.set_barrier()
-                node.draw(screen.window, screen.graph, update=screen.animate)
-                if screen.animate:
-                    pygame.time.delay(
-                        DELAYS[screen.animation_speed][graph_size] // 2)
+                node.draw(screen)

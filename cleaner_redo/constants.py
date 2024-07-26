@@ -6,6 +6,7 @@ DELAYS = {
     "N": {25: 20, 45: 10, 75: 5},
     "F": {25: 10, 45: 5, 75: 3}
 }
+MAZE_DELAY_MULTIPLIER = 2
 
 
 # possible neighbor directions

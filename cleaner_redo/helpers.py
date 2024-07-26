@@ -115,13 +115,13 @@ def draw_path(screen, path):
         run_checks(screen)
         if not prev.is_start():
             prev.color = PATH_COLOR
-            prev.draw(screen.window, graph, update=True)
+            prev.draw(screen)
         if not node.is_start() and not node.is_end():
             node.color = YELLOW
-            node.draw(screen.window, graph, update=True)
+            node.draw(screen)
             prev = node
         # Delay based on length relative to GRAPH_SIZE and base delay
-        delay = round(4 * graph.size / len(path) * 6 *
+        delay = round(4 * graph.size / len(path) * 4 *
                       DELAYS[screen.animation_speed][graph.size])
         if delay > 80:
             delay = 80

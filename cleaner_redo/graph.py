@@ -17,12 +17,12 @@ class Graph:
         self.start = None
         self.end = None
 
-    def draw(self, window, update=True):
+    def draw(self, screen):
         # Draws the graph and gridlines if toggled
         for row in self.grid:
             for node in row:
-                node.draw(window, self, update=False)
-        if update:
+                node.draw(screen)
+        if screen.animate:
             pygame.display.update()
 
     def resize_nodes(self, window):
@@ -41,13 +41,19 @@ class Graph:
 
     def generate_maze(self, screen, selected_maze):
         self.clear(save_barriers=False)
-        self.draw(screen.window)
+        screen.animate = False
+        screen.delay_multiplier = MAZE_DELAY_MULTIPLIER
+        self.draw(screen)
         if selected_maze == "Random":
+            screen.animate = True
             random_maze(screen)
         elif selected_maze == "Backtrack":
             self.fill()
-            self.draw(screen.window)
+            self.draw(screen)
+            screen.animate = True
             backtrack(screen, 1, 1)
+
+        screen.reset_delay_multiplier()
 
     def get_grid_pos(self, window, pos):
         """
@@ -65,6 +71,7 @@ class Graph:
                 node.set_barrier()
 
     def add_border(self, animation_speed, depth=0):
+        # screen animate false and own delay
         for i in range(self.size):
             self.grid[depth][i].set_barrier()
             self.grid[depth][i].draw()
@@ -147,7 +154,9 @@ class GraphNode:
 
         return self.source_dist < other.source_dist
 
-    def draw(self, window, graph, update=True):
+    def draw(self, screen):
+        window, graph = screen.window, screen.graph
+
         x = get_side_tab_size(window, graph) + self.row * graph.node_size
         y = get_tb_tab_size(window, graph) + self.col * graph.node_size
 
@@ -167,8 +176,10 @@ class GraphNode:
             pygame.draw.line(window, LINE_COLOR, (x, y + graph.node_size),
                              (x + graph.node_size, y + graph.node_size))
 
-        if update:
+        if screen.animate:
             pygame.display.update()
+            pygame.time.delay(DELAYS[screen.animation_speed]
+                              [graph.size] * screen.delay_multiplier)
 
     def get_neighbors(self, graph):
         def valid_neighbor(row, col):
