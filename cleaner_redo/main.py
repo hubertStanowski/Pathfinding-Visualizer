@@ -62,7 +62,6 @@ def main():
                         if button.rect.collidepoint(pos):
                             if label == "RUN":
                                 if graph.start and graph.end and screen.selected_algorithm:
-                                    graph.clear()
                                     toggle_run_finish_buttons(screen)
                                     screen.draw()
                                     path = graph.search(screen)
@@ -91,8 +90,11 @@ def main():
 
                     for label, button in screen.buttons["maze_buttons"].items():
                         if button.rect.collidepoint(pos):
-                            graph.clear(save_barriers=False)
-                            # generate_maze(label)
+                            toggle_run_finish_buttons(screen)
+                            screen.draw()
+                            graph.generate_maze(screen, label)
+                            toggle_run_finish_buttons(screen)
+                            screen.draw()
                             break
 
             elif pygame.mouse.get_pressed()[2]:

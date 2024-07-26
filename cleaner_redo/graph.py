@@ -1,6 +1,7 @@
 from constants import *
 from helpers import *
 from pathfinding import *
+from maze_generation import *
 
 import pygame
 from math import inf
@@ -28,6 +29,7 @@ class Graph:
         self.node_size = round(get_grid_size(window, self) / self.size)
 
     def search(self, screen):
+        self.clear()
         if screen.selected_algorithm == "BFS":
             return BFS(screen)
         elif screen.selected_algorithm == "DFS":
@@ -36,6 +38,12 @@ class Graph:
             return dijkstras(screen)
         elif screen.selected_algorithm == "A*":
             return astar(screen)
+
+    def generate_maze(self, screen, selected_maze):
+        self.clear(save_barriers=False)
+        self.draw(screen.window)
+        if selected_maze == "Random":
+            random_maze(screen)
 
     def get_grid_pos(self, window, pos):
         """
