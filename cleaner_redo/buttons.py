@@ -11,30 +11,24 @@ class BigButton:
         self.x = x
         self.y = y
         self.width, self.height = get_big_button_size(screen.window)
-        self.rect = pygame.Rect(
-            x, y, self.width, self.height)
+        self.rect = pygame.Rect(x, y, self.width, self.height)
         self.color = color
         self.visible = visible
         self.cooldown = cooldown
         self.last_click_time = -inf
 
     def draw(self, window):
-        if not self.is_visible():
-            return
-
-        pygame.draw.rect(window, self.color, self.rect)
-        current_font = pygame.font.SysFont(
-            FONT, get_big_button_font_size(window))
-        label = current_font.render(self.label, True, BLACK)
-        text_rect = label.get_rect(center=(
-            self.x + self.width // 2, self.y + self.height // 2))
-        window.blit(label, text_rect)
-
-    def is_visible(self):
-        return self.visible
+        if self.visible:
+            pygame.draw.rect(window, self.color, self.rect)
+            current_font = pygame.font.SysFont(
+                FONT, get_big_button_font_size(window))
+            label = current_font.render(self.label, True, BUTTON_FONT_COLOR)
+            text_rect = label.get_rect(
+                center=(self.x + self.width // 2, self.y + self.height // 2))
+            window.blit(label, text_rect)
 
     def clicked(self, pos):
-        valid = (self.is_visible() and self.rect.collidepoint(pos))
+        valid = (self.visible and self.rect.collidepoint(pos))
         if self.cooldown:
             current_time = pygame.time.get_ticks()
             valid = valid and (
@@ -58,7 +52,7 @@ class SmallButton:
         pygame.draw.rect(window, self.color, self.rect)
         current_font = pygame.font.SysFont(
             FONT, get_small_button_font_size(window))
-        label = current_font.render(self.label, True, BLACK)
+        label = current_font.render(self.label, True, BUTTON_FONT_COLOR)
         text_rect = label.get_rect(
             center=(self.x + self.size // 2, self.y + self.size // 2))
         window.blit(label, text_rect)
@@ -73,7 +67,7 @@ class SmallButton:
         return self.rect.collidepoint(pos)
 
 
-def initialize_buttons(screen):
+def initialize_buttons(screen, algorithm_running=False):
     window, graph = screen.window, screen.graph
     tb_size = get_tb_tab_size(window, graph)
     side_size = get_side_tab_size(window, graph)
@@ -104,14 +98,14 @@ def initialize_buttons(screen):
     screen.add_buttons("animation_buttons", animation_buttons)
     update_animation_buttons(screen)
 
-    # Initialize control buttons
+    # Initialize action buttons
     x -= small_button_size * 0.95
     y += diff * 1.7
     diff_grid = small_button_size * 4.3 + legend_font_size + diff*1.7
     diff = big_button_height + small_button_size*0.5
 
-    action_buttons = {"RUN": BigButton(screen, "RUN", x, y, color=START_COLOR, cooldown=DEFAULT_BUTTON_COOLDOWN),
-                      "FINISH": BigButton(screen, "FINISH", x, y, color=VISITED_COLOR, visible=False, cooldown=DEFAULT_BUTTON_COOLDOWN),
+    action_buttons = {"RUN": BigButton(screen, "RUN", x, y, color=START_COLOR, visible=(not algorithm_running), cooldown=DEFAULT_BUTTON_COOLDOWN),
+                      "FINISH": BigButton(screen, "FINISH", x, y, color=VISITED_COLOR, visible=algorithm_running, cooldown=DEFAULT_BUTTON_COOLDOWN),
                       "CLEAR": BigButton(screen, "CLEAR", x, y + diff, color=YELLOW),
                       "RESET": BigButton(screen, "RESET", x, y + diff*2, color=END_COLOR)}
 
@@ -119,7 +113,7 @@ def initialize_buttons(screen):
 
     # Initialize gridline buttons
     gridline_buttons = {"GRID OFF": BigButton(screen, "GRID OFF", x, y-diff_grid, color=FREE_COLOR, cooldown=DEFAULT_BUTTON_COOLDOWN),
-                        "GRID ON": BigButton(screen, "GRID ON", x, y-diff_grid, color=BLUE, cooldown=DEFAULT_BUTTON_COOLDOWN)}
+                        "GRID ON": BigButton(screen, "GRID ON", x, y-diff_grid, color=PATH_COLOR, cooldown=DEFAULT_BUTTON_COOLDOWN)}
 
     screen.add_buttons("gridline_buttons", gridline_buttons)
     update_gridline_buttons(screen)
@@ -129,10 +123,10 @@ def initialize_buttons(screen):
     y += diff * 2
     diff = big_button_height + small_button_size
 
-    maze_buttons = {"Prim's": BigButton(screen, "Prim's", x, y - diff*3, color=LIGHT_GREEN),
-                    "Division": BigButton(screen, "Division", x, y - diff*2,  color=LIGHT_GREEN),
-                    "Backtrack": BigButton(screen, "Backtrack", x, y - diff, color=LIGHT_GREEN),
-                    "Random": BigButton(screen, "Random", x, y,  color=LIGHT_GREEN)}
+    maze_buttons = {"Prim's": BigButton(screen, "Prim's", x, y - diff*3, color=MAZE_BUTTON_COLOR),
+                    "Division": BigButton(screen, "Division", x, y - diff*2,  color=MAZE_BUTTON_COLOR),
+                    "Backtrack": BigButton(screen, "Backtrack", x, y - diff, color=MAZE_BUTTON_COLOR),
+                    "Random": BigButton(screen, "Random", x, y,  color=MAZE_BUTTON_COLOR)}
 
     screen.add_buttons("maze_buttons", maze_buttons)
 

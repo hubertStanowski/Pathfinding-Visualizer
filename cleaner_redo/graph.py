@@ -18,7 +18,6 @@ class Graph:
         self.end = None
 
     def draw(self, screen, update=False):
-        # Draws the graph and gridlines if toggled
         for row in self.grid:
             for node in row:
                 node.draw(screen)
@@ -34,9 +33,9 @@ class Graph:
         self.draw(screen, update=True)
         screen.animate = True
         if screen.selected_algorithm == "BFS":
-            return BFS(screen)
+            return bfs(screen)
         elif screen.selected_algorithm == "DFS":
-            return DFS(screen)
+            return dfs(screen)
         elif screen.selected_algorithm == "Dijkstra's":
             return dijkstras(screen)
         elif screen.selected_algorithm == "A*":
@@ -148,8 +147,8 @@ class GraphNode:
         self.col = col
         self.color = FREE_COLOR
         self.path = []
-        self.source_dist = inf  # g score in a*
-        self.target_dist = inf  # f score in a*
+        self.source_dist = inf
+        self.target_dist = inf
 
     def __lt__(self, other):
         if self.target_dist is not inf:

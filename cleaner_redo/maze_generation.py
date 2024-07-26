@@ -34,7 +34,6 @@ def backtrack(screen, row, col):
                         link.set_free()
                         link.draw(screen)
 
-                # Recursive call
                 backtrack(screen, far_neighbor.row, far_neighbor.col)
 
 

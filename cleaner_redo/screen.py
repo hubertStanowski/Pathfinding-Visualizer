@@ -1,5 +1,6 @@
 import pygame
 from buttons import initialize_buttons
+from legend import initialize_legend
 
 
 class Screen:
@@ -23,23 +24,28 @@ class Screen:
             if self.legend:
                 self.legend.draw(self.window, self.graph)
 
+        self.draw_buttons()
+
+        self.animate = True
+        pygame.display.update()
+
+    def draw_buttons(self):
         if self.buttons:
             for current_buttons in self.buttons.values():
                 for button in current_buttons.values():
                     button.draw(self.window)
 
-        self.animate = True
-
         pygame.display.update()
 
-    def resize_window(self, new_window):
+    def resize(self, new_window):
         self.window = new_window
         if self.graph:
             self.graph.resize_nodes(new_window)
             if self.legend:
-                self.legend = self.legend.resize(self)
+                self.legend = initialize_legend(self)
             if self.buttons:
-                initialize_buttons(self)
+                algorithm_running = not self.buttons["action_buttons"]["RUN"].visible
+                initialize_buttons(self, algorithm_running)
 
         self.draw()
 
@@ -49,11 +55,11 @@ class Screen:
     def add_buttons(self, label, buttons):
         self.buttons[label] = buttons
 
-    def set_legend(self, new_legend):
+    def update_legend(self, new_legend):
         self.legend = new_legend
 
-    def set_graph(self, new_graph):
+    def update_graph(self, new_graph):
         self.graph = new_graph
 
-    def set_animation_speed(self, new_animation_speed):
+    def update_animation_speed(self, new_animation_speed):
         self.animation_speed = new_animation_speed

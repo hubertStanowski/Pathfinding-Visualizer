@@ -1,7 +1,7 @@
 from constants import *
-from screen import *
-from graph import *
 from helpers import *
+from screen import Screen
+from graph import Graph
 from buttons import initialize_buttons
 from legend import initialize_legend
 
@@ -15,9 +15,9 @@ def main():
         (display_info.current_w, display_info.current_h), pygame.RESIZABLE)
     pygame.display.set_caption("Pathfinding Visualizer")
 
-    screen = Screen(window)
-    screen.set_graph(Graph(window, size=45))
-    screen.set_legend(initialize_legend(screen))
+    screen = Screen(window, background=BARRIER_COLOR)
+    screen.update_graph(Graph(window, size=45))
+    screen.update_legend(initialize_legend(screen))
     initialize_buttons(screen)
 
     clock = pygame.time.Clock()
@@ -25,8 +25,8 @@ def main():
     while True:
         clock.tick(60)
         screen.draw()
-        graph = screen.graph
         old_width, old_height = screen.window.get_size()
+        graph = screen.graph
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -35,9 +35,9 @@ def main():
             if event.type == pygame.VIDEORESIZE:
                 new_width, new_height = get_updated_screen_dimensions(
                     (old_width, old_height), (event.w, event.h))
-                window = pygame.display.set_mode(
+                new_window = pygame.display.set_mode(
                     (new_width, new_height), pygame.RESIZABLE)
-                screen.resize_window(window)
+                screen.resize(new_window)
 
             if pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()
@@ -49,13 +49,13 @@ def main():
                 else:
                     for label, button in screen.buttons["size_buttons"].items():
                         if button.clicked(pos):
-                            screen.set_graph(
+                            screen.update_graph(
                                 Graph(window, label, graph.gridlines))
                             update_size_buttons(screen)
 
                     for label, button in screen.buttons["animation_buttons"].items():
                         if button.clicked(pos):
-                            screen.set_animation_speed(label)
+                            screen.update_animation_speed(label)
                             update_animation_buttons(screen)
 
                     for label, button in screen.buttons["action_buttons"].items():
@@ -63,10 +63,8 @@ def main():
                             if label == "RUN":
                                 if graph.start and graph.end and screen.selected_algorithm:
                                     toggle_run_finish_buttons(screen)
-                                    screen.draw()
                                     path = graph.search(screen)
                                     toggle_run_finish_buttons(screen)
-                                    screen.draw()
                                     if path:
                                         draw_path(screen, path)
                                     else:
@@ -75,7 +73,7 @@ def main():
                             elif label == "CLEAR":
                                 graph.clear()
                             elif label == "RESET":
-                                screen.set_graph(
+                                screen.update_graph(
                                     Graph(window, graph.size, graph.gridlines))
 
                     for button in screen.buttons["gridline_buttons"].values():
@@ -91,10 +89,8 @@ def main():
                     for label, button in screen.buttons["maze_buttons"].items():
                         if button.clicked(pos):
                             toggle_run_finish_buttons(screen)
-                            screen.draw()
                             graph.generate_maze(screen, label)
                             toggle_run_finish_buttons(screen)
-                            screen.draw()
 
             elif pygame.mouse.get_pressed()[2]:
                 row, col = graph.get_grid_pos(window, pygame.mouse.get_pos())

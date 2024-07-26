@@ -7,9 +7,9 @@ from math import sqrt
 
 
 # Breadth-first search algorithm
-def BFS(screen):
+def bfs(screen):
     graph = screen.graph
-    queue = deque([(graph.start, [graph.start])])
+    queue = deque([(graph.get_start(), [graph.get_start()])])
 
     while queue:
         run_checks(screen)
@@ -26,9 +26,9 @@ def BFS(screen):
 
 
 # Depth-first search algorithm
-def DFS(screen):
+def dfs(screen):
     graph = screen.graph
-    stack = [graph.start]
+    stack = [graph.get_start()]
     visited = []
 
     while stack:

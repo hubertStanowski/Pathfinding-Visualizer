@@ -14,9 +14,9 @@ def run_checks(screen):
         if event.type == pygame.VIDEORESIZE:
             new_width, new_height = get_updated_screen_dimensions(
                 (old_width, old_height), (event.w, event.h))
-            window = pygame.display.set_mode(
+            new_window = pygame.display.set_mode(
                 (new_width, new_height), pygame.RESIZABLE)
-            screen.resize_window(window)
+            screen.resize(new_window)
 
         if pygame.mouse.get_pressed()[0]:
             pos = pygame.mouse.get_pos()
@@ -27,17 +27,15 @@ def run_checks(screen):
 
             for button in screen.buttons["gridline_buttons"].values():
                 if button.clicked(pos):
-                    update_gridline_buttons(screen, toggle=True)
+                    toggle_gridline_buttons(screen)
                     screen.graph.toggle_gridlines()
                     screen.draw()
-                    break
 
             for label, button in screen.buttons["animation_buttons"].items():
                 if button.clicked(pos):
-                    screen.set_animation_speed(label)
+                    screen.update_animation_speed(label)
                     update_animation_buttons(screen)
-                    screen.draw()
-                    break
+                    screen.draw_buttons()
 
 
 def get_updated_screen_dimensions(old_dimensions, new_dimensions):
@@ -107,8 +105,8 @@ def get_big_button_font_size(window):
     return round(5/7 * big_button_height)
 
 
-# Draw the path between start and end
 def draw_path(screen, path):
+    screen.animate = True
     graph = screen.graph
     prev = path[0]
     for node in path[1:]:
@@ -128,7 +126,6 @@ def draw_path(screen, path):
         pygame.time.delay(delay)
 
 
-# Inform that no path has been found
 def handle_no_path(screen):
     font = pygame.font.SysFont(FONT, 120)
     window_width, window_height = screen.window.get_size()
@@ -169,6 +166,14 @@ def update_gridline_buttons(screen):
         grid_off.visible = True
 
 
+def update_pathfinding_buttons(screen):
+    for label, button in screen.buttons["pathfinding_buttons"].items():
+        if label != screen.selected_algorithm:
+            button.color = FREE_COLOR
+        else:
+            button.color = PATH_COLOR
+
+
 def toggle_gridline_buttons(screen):
     grid_on = screen.buttons["gridline_buttons"]["GRID ON"]
     grid_off = screen.buttons["gridline_buttons"]["GRID OFF"]
@@ -180,13 +185,7 @@ def toggle_gridline_buttons(screen):
     grid_on.last_click_time = current_time
     grid_off.last_click_time = current_time
 
-
-def update_pathfinding_buttons(screen):
-    for label, button in screen.buttons["pathfinding_buttons"].items():
-        if label != screen.selected_algorithm:
-            button.color = FREE_COLOR
-        else:
-            button.color = PATH_COLOR
+    screen.draw_buttons()
 
 
 def toggle_run_finish_buttons(screen):
@@ -197,3 +196,5 @@ def toggle_run_finish_buttons(screen):
     current_time = pygame.time.get_ticks()
     run.last_click_time = current_time
     finish.last_click_time = current_time
+
+    screen.draw_buttons()

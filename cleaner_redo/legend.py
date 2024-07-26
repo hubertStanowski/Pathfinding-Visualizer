@@ -15,9 +15,6 @@ class Legend:
     def add_node(self, node):
         self.nodes.append(node)
 
-    def resize(self, screen):
-        return initialize_legend(screen)
-
 
 class LegendNode:
     def __init__(self, label, x, y, color=None, action="") -> None:
@@ -31,9 +28,10 @@ class LegendNode:
         font = pygame.font.SysFont(FONT, get_legend_font_size(window, graph))
 
         if self.action != "" or self.color is not None:
-            label = font.render(self.action + " - " + self.label, True, WHITE)
+            label = font.render(self.action + " - " +
+                                self.label, True, LEGEND_FONT_COLOR)
         else:
-            label = font.render(self.label, True, WHITE)
+            label = font.render(self.label, True, LEGEND_FONT_COLOR)
 
         label_width, label_height = label.get_size()
 
