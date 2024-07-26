@@ -5,7 +5,6 @@ import pygame
 
 # Helper function for handling events within algorithms
 def run_checks(screen):
-    # TODO allow for toggling gridlines while running algorithms
     # TODO allow for changing animation speed while running algorithms
     old_width, old_height = screen.window.get_size()
     for event in pygame.event.get():
@@ -22,9 +21,17 @@ def run_checks(screen):
 
         if pygame.mouse.get_pressed()[0]:
             pos = pygame.mouse.get_pos()
-            finish_button = screen.buttons["control_buttons"]["FINISH"]
+            finish_button = screen.buttons["action_buttons"]["FINISH"]
+
             if finish_button.rect.collidepoint(pos) and finish_button.is_visible():
                 screen.animate = False
+
+            for button in screen.buttons["gridline_buttons"].values():
+                if button.rect.collidepoint(pos):
+                    update_gridline_buttons(screen, toggle=True)
+                    screen.graph.toggle_gridlines()
+                    screen.draw()
+                    break
 
 
 def get_updated_screen_dimensions(old_dimensions, new_dimensions):
@@ -127,3 +134,48 @@ def handle_no_path(screen):
     screen.window.blit(label, label_rect)
     pygame.display.update()
     pygame.time.delay(500)
+
+
+def update_size_buttons(screen):
+    for label, button in screen.buttons["size_buttons"].items():
+        if screen.graph.size == label:
+            button.select()
+        else:
+            button.unselect()
+
+
+def update_animation_buttons(screen):
+    for label, button in screen.buttons["animation_buttons"].items():
+        if label == screen.animation_speed:
+            button.select()
+        else:
+            button.unselect()
+
+
+def update_gridline_buttons(screen, toggle=False):
+    grid_on = screen.buttons["gridline_buttons"]["GRID ON"]
+    grid_off = screen.buttons["gridline_buttons"]["GRID OFF"]
+    if screen.graph.gridlines:
+        grid_on.visible = True
+        grid_off.visible = False
+    else:
+        grid_on.visible = False
+        grid_off.visible = True
+
+    if toggle:
+        screen.graph.gridline = not screen.graph.gridlines
+        grid_on.visible = not grid_on.visible
+        grid_off.visible = not grid_off.visible
+
+
+def update_pathfinding_buttons(screen, selected):
+    for label, button in screen.buttons["pathfinding_buttons"].items():
+        if label != selected:
+            button.color = FREE_COLOR
+        else:
+            button.color = PATH_COLOR
+
+
+def toggle_run_finish_buttons(screen):
+    screen.buttons["action_buttons"]["RUN"].visible = not screen.buttons["action_buttons"]["RUN"].visible
+    screen.buttons["action_buttons"]["FINISH"].visible = not screen.buttons["action_buttons"]["FINISH"].visible

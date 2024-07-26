@@ -87,20 +87,24 @@ def initialize_buttons(screen):
     screen.add_buttons("animation_buttons", animation_buttons)
     update_animation_buttons(screen)
 
-    # Initialize buttons for graph management and view
+    # Initialize control buttons
     x -= small_button_size * 0.95
     y += diff * 1.7
     diff_grid = small_button_size * 4.3 + legend_font_size + diff*1.7
     diff = big_button_height + small_button_size*0.5
 
-    control_buttons = {"GRID OFF": BigButton(screen, "GRID OFF", x, y-diff_grid, color=FREE_COLOR),
-                       "GRID ON": BigButton(screen, "GRID ON", x, y-diff_grid, color=BLUE),
-                       "RUN": BigButton(screen, "RUN", x, y, color=START_COLOR),
-                       "FINISH": BigButton(screen, "FINISH", x, y, color=VISITED_COLOR, visible=False),
-                       "CLEAR": BigButton(screen, "CLEAR", x, y + diff, color=YELLOW),
-                       "RESET": BigButton(screen, "RESET", x, y + diff*2, color=END_COLOR)}
+    action_buttons = {"RUN": BigButton(screen, "RUN", x, y, color=START_COLOR),
+                      "FINISH": BigButton(screen, "FINISH", x, y, color=VISITED_COLOR, visible=False),
+                      "CLEAR": BigButton(screen, "CLEAR", x, y + diff, color=YELLOW),
+                      "RESET": BigButton(screen, "RESET", x, y + diff*2, color=END_COLOR)}
 
-    screen.add_buttons("control_buttons", control_buttons)
+    screen.add_buttons("action_buttons", action_buttons)
+
+    # Initialize gridline buttons
+    gridline_buttons = {"GRID OFF": BigButton(screen, "GRID OFF", x, y-diff_grid, color=FREE_COLOR),
+                        "GRID ON": BigButton(screen, "GRID ON", x, y-diff_grid, color=BLUE)}
+
+    screen.add_buttons("gridline_buttons", gridline_buttons)
     update_gridline_buttons(screen)
 
     # Initialize buttons for maze-generating algorithms
@@ -122,48 +126,3 @@ def initialize_buttons(screen):
                            "A*": BigButton(screen, "A*", x, y - diff*4)}
 
     screen.add_buttons("pathfinding_buttons", pathfinding_buttons)
-
-
-def update_size_buttons(screen):
-    for label, button in screen.buttons["size_buttons"].items():
-        if screen.graph.size == label:
-            button.select()
-        else:
-            button.unselect()
-
-
-def update_animation_buttons(screen):
-    for label, button in screen.buttons["animation_buttons"].items():
-        if label == screen.animation_speed:
-            button.select()
-        else:
-            button.unselect()
-
-
-def update_gridline_buttons(screen, toggle=False):
-    grid_on = screen.buttons["control_buttons"]["GRID ON"]
-    grid_off = screen.buttons["control_buttons"]["GRID OFF"]
-    if screen.graph.gridlines:
-        grid_on.visible = True
-        grid_off.visible = False
-    else:
-        grid_on.visible = False
-        grid_off.visible = True
-
-    if toggle:
-        screen.graph.gridline = not screen.graph.gridlines
-        grid_on.visible = not grid_on.visible
-        grid_off.visible = not grid_off.visible
-
-
-def update_pathfinding_buttons(screen, selected):
-    for label, button in screen.buttons["pathfinding_buttons"].items():
-        if label != selected:
-            button.color = FREE_COLOR
-        else:
-            button.color = PATH_COLOR
-
-
-def toggle_run_finish_buttons(screen):
-    screen.buttons["control_buttons"]["RUN"].visible = not screen.buttons["control_buttons"]["RUN"].visible
-    screen.buttons["control_buttons"]["FINISH"].visible = not screen.buttons["control_buttons"]["FINISH"].visible

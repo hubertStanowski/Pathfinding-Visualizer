@@ -27,7 +27,6 @@ def main():
         screen.draw()
         graph = screen.graph
         old_width, old_height = screen.window.get_size()
-        wait = False    # For preventing multi-clicks
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -60,7 +59,7 @@ def main():
                             screen.set_animation_speed(label)
                             update_animation_buttons(screen)
 
-                    for label, button in screen.buttons["control_buttons"].items():
+                    for label, button in screen.buttons["action_buttons"].items():
                         if button.rect.collidepoint(pos):
                             if label == "RUN":
                                 if graph.start and graph.end and selected_algorithm:
@@ -80,10 +79,12 @@ def main():
                             elif label == "RESET":
                                 screen.set_graph(
                                     Graph(window, graph.size, graph.gridlines))
-                            elif (label == "GRID OFF" or label == "GRID ON") and not wait:
-                                update_gridline_buttons(screen, toggle=True)
-                                graph.toggle_gridlines()
-                                wait = True
+
+                    for button in screen.buttons["gridline_buttons"].values():
+                        if button.rect.collidepoint(pos):
+                            update_gridline_buttons(screen, toggle=True)
+                            graph.toggle_gridlines()
+                            break
 
                     for label, button in screen.buttons["pathfinding_buttons"].items():
                         if button.rect.collidepoint(pos):
@@ -92,10 +93,10 @@ def main():
                                 screen, selected_algorithm)
 
                     for label, button in screen.buttons["maze_buttons"].items():
-                        if button.rect.collidepoint(pos) and not wait:
+                        if button.rect.collidepoint(pos):
                             graph.clear(save_barriers=False)
-                            wait = True
                             # generate_maze(label)
+                            break
 
             elif pygame.mouse.get_pressed()[2]:
                 row, col = graph.get_grid_pos(window, pygame.mouse.get_pos())
