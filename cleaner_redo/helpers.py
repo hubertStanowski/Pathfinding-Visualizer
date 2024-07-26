@@ -5,7 +5,6 @@ import pygame
 
 # Helper function for handling events within algorithms
 def run_checks(screen):
-    # TODO allow for changing animation speed while running algorithms
     old_width, old_height = screen.window.get_size()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -30,6 +29,13 @@ def run_checks(screen):
                 if button.rect.collidepoint(pos):
                     update_gridline_buttons(screen, toggle=True)
                     screen.graph.toggle_gridlines()
+                    screen.draw()
+                    break
+
+            for label, button in screen.buttons["animation_buttons"].items():
+                if button.rect.collidepoint(pos):
+                    screen.set_animation_speed(label)
+                    update_animation_buttons(screen)
                     screen.draw()
                     break
 
