@@ -58,6 +58,11 @@ class Graph:
             screen.animate = True
             divide(screen, 0, self.size-1, 0, self.size-1)
             self.add_border(screen, depth=0)
+        elif selected_maze == "Prim's":
+            self.fill()
+            self.draw(screen)
+            screen.animate = True
+            prims(screen)
 
         screen.reset_delay_multiplier()
 

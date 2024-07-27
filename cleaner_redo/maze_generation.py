@@ -5,9 +5,49 @@ from random import choice, shuffle, randrange
 from math import floor
 
 
+# Prim's maze generator
+def prims(screen):
+    graph = screen.graph
+    grid = graph.grid
+    row, col = randrange(graph.size), randrange(graph.size)
+
+    # [0] = middle node between current frontier and previous frontier
+    # [1] = current frontier
+    frontiers = [[(row, col), (row, col)]]
+
+    while frontiers:
+        run_checks(screen)
+
+        frontier = choice(frontiers)
+        frontiers.remove(frontier)
+        row, col = frontier.pop()
+        current = grid[row][col]
+
+        if current.is_barrier():
+            mid_row, mid_col = frontier.pop()
+            mid = grid[mid_row][mid_col]
+
+            # Create a passage
+            current.set_free()
+            current.draw(screen)
+            if mid.is_barrier():
+                mid.set_free()
+                mid.draw(screen)
+
+            # If in the graph, add fontiers of the current frontier (with nodes in between them) to the list of frontiers
+            if (row >= 2 and grid[row-2][col].is_barrier()):
+                frontiers.append([(row-1, col), (row-2, col)])
+            if (col >= 2 and grid[row][col-2].is_barrier()):
+                frontiers.append([(row, col-1), (row, col-2)])
+            if (row < graph.size-2 and grid[row+2][col].is_barrier()):
+                frontiers.append([(row+1, col), (row+2, col)])
+            if (col < graph.size-2 and grid[row][col+2].is_barrier()):
+                frontiers.append([(row, col+1), (row, col+2)])
+
+
 # Recursive division maze generator
-def divide(screen, min_x, max_x, min_y,  max_y):
-    width, height = max_x - min_x, max_y - min_y
+def divide(screen, min_row, max_row, min_col,  max_col):
+    width, height = max_row - min_row, max_col - min_col
     horizontal = choose_orientation(width, height)
     grid = screen.graph.grid
 
@@ -16,45 +56,45 @@ def divide(screen, min_x, max_x, min_y,  max_y):
             return
 
         # Randomly generate a wall
-        y = floor(randrange(min_y, max_y+1) / 2) * 2
+        col = floor(randrange(min_col, max_col+1) / 2) * 2
 
         # Randomly generate a hole
-        hole = floor(randrange(min_x, max_x+1) / 2) * 2 + 1
+        hole = floor(randrange(min_row, max_row+1) / 2) * 2 + 1
 
-        for x in range(min_x, max_x+1):
+        for row in range(min_row, max_row+1):
             run_checks(screen)
-            current = grid[y][x]
-            if x == hole and not current.is_start() and not current.is_end():
+            current = grid[col][row]
+            if row == hole and not current.is_start() and not current.is_end():
                 current.set_free()
             else:
                 current.set_barrier()
 
             current.draw(screen)
 
-        divide(screen, min_x, max_x, min_y, y-1)
-        divide(screen, min_x, max_x, y+1, max_y)
+        divide(screen, min_row, max_row, min_col, col-1)
+        divide(screen, min_row, max_row, col+1, max_col)
     else:
         if height < 2:
             return
 
         # Randomly generate a wall
-        x = floor(randrange(min_x, max_x+1) / 2) * 2
+        row = floor(randrange(min_row, max_row+1) / 2) * 2
 
         # Randomly generate a hole
-        hole = floor(randrange(min_y, max_y+1) / 2) * 2 + 1
+        hole = floor(randrange(min_col, max_col+1) / 2) * 2 + 1
 
-        for y in range(min_y, max_y+1):
+        for col in range(min_col, max_col+1):
             run_checks(screen)
-            current = grid[y][x]
-            if y == hole and not current.is_start() and not current.is_end():
+            current = grid[col][row]
+            if col == hole and not current.is_start() and not current.is_end():
                 current.set_free()
             else:
                 current.set_barrier()
 
             current.draw(screen)
 
-        divide(screen, min_x, x-1, min_y, max_y)
-        divide(screen, x+1, max_x, min_y, max_y)
+        divide(screen, min_row, row-1, min_col, max_col)
+        divide(screen, row+1, max_row, min_col, max_col)
 
 
 # Helper function for divide()
