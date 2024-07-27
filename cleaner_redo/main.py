@@ -16,7 +16,7 @@ def main():
     pygame.display.set_caption("Pathfinding Visualizer")
 
     screen = Screen(window, background=BARRIER_COLOR)
-    screen.update_graph(Graph(window, size=45))
+    screen.update_graph(Graph(window, size=MEDIUM))
     screen.update_legend(initialize_legend(screen))
     initialize_buttons(screen)
 

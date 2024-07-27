@@ -1,13 +1,17 @@
-FONT = None
+SMALL, MEDIUM, LARGE = 25, 45, 75
 
+# TODO make grid_size dynamic to best fit change delays dict to only assign multipliers to s n f
 # Base delays based on animation_speed and graph_size
 DELAYS = {
-    "S": {25: 30, 45: 15, 75: 8},
-    "N": {25: 20, 45: 10, 75: 5},
-    "F": {25: 10, 45: 5, 75: 3}
+    "S": {SMALL: 30, MEDIUM: 20, LARGE: 10},
+    "N": {SMALL: 20, MEDIUM: 10, LARGE: 5},
+    "F": {SMALL: 10, MEDIUM: 5, LARGE: 3}
 }
 
+
 MAZE_DELAY_MULTIPLIER = 2
+
+FONT = None
 
 DEFAULT_BUTTON_COOLDOWN = 200
 

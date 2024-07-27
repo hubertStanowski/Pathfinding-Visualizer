@@ -81,9 +81,9 @@ def initialize_buttons(screen, algorithm_running=False):
     y = tb_size + 10.1 * small_button_size + legend_font_size
     diff = small_button_size * 1.2
 
-    size_buttons = {25: SmallButton(screen, "S", x, y),
-                    45: SmallButton(screen, "M", x + diff, y),
-                    75: SmallButton(screen, "L", x + diff*2, y)}
+    size_buttons = {SMALL: SmallButton(screen, "S", x, y),
+                    MEDIUM: SmallButton(screen, "M", x + diff, y),
+                    LARGE: SmallButton(screen, "L", x + diff*2, y)}
 
     screen.add_buttons("size_buttons", size_buttons)
     update_size_buttons(screen)
