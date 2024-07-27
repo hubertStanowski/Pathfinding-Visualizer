@@ -54,6 +54,10 @@ class Graph:
             self.draw(screen)
             screen.animate = True
             backtrack(screen, 1, 1)
+        elif selected_maze == "Division":
+            screen.animate = True
+            divide(screen, 0, self.size-1, 0, self.size-1)
+            self.add_border(screen, depth=0)
 
         screen.reset_delay_multiplier()
 
@@ -72,22 +76,20 @@ class Graph:
             for node in row:
                 node.set_barrier()
 
-    def add_border(self, animation_speed, depth=0):
-        # screen animate false and own delay
+    def add_border(self, screen, depth=0):
         for i in range(self.size):
+
             self.grid[depth][i].set_barrier()
-            self.grid[depth][i].draw()
+            self.grid[depth][i].draw(screen)
 
             self.grid[self.size-1-depth][i].set_barrier()
-            self.grid[self.size-1-depth][i].draw()
+            self.grid[self.size-1-depth][i].draw(screen)
 
             self.grid[i][depth].set_barrier()
-            self.grid[i][depth].draw()
+            self.grid[i][depth].draw(screen)
 
             self.grid[i][self.size-1-depth].set_barrier()
-            self.grid[i][self.size-1-depth].draw()
-
-            pygame.time.delay(2 * DELAYS[animation_speed][self.size])
+            self.grid[i][self.size-1-depth].draw(screen)
 
     def clear(self, save_barriers=True):
         for row in range(self.size):

@@ -1,7 +1,71 @@
 from constants import *
 from helpers import run_checks
 
-from random import choice, shuffle
+from random import choice, shuffle, randrange
+from math import floor
+
+
+# Recursive division maze generator
+def divide(screen, min_x, max_x, min_y,  max_y):
+    width, height = max_x - min_x, max_y - min_y
+    horizontal = choose_orientation(width, height)
+    grid = screen.graph.grid
+
+    if horizontal:
+        if width < 2:
+            return
+
+        # Randomly generate a wall
+        y = floor(randrange(min_y, max_y+1) / 2) * 2
+
+        # Randomly generate a hole
+        hole = floor(randrange(min_x, max_x+1) / 2) * 2 + 1
+
+        for x in range(min_x, max_x+1):
+            run_checks(screen)
+            current = grid[y][x]
+            if x == hole and not current.is_start() and not current.is_end():
+                current.set_free()
+            else:
+                current.set_barrier()
+
+            current.draw(screen)
+
+        divide(screen, min_x, max_x, min_y, y-1)
+        divide(screen, min_x, max_x, y+1, max_y)
+    else:
+        if height < 2:
+            return
+
+        # Randomly generate a wall
+        x = floor(randrange(min_x, max_x+1) / 2) * 2
+
+        # Randomly generate a hole
+        hole = floor(randrange(min_y, max_y+1) / 2) * 2 + 1
+
+        for y in range(min_y, max_y+1):
+            run_checks(screen)
+            current = grid[y][x]
+            if y == hole and not current.is_start() and not current.is_end():
+                current.set_free()
+            else:
+                current.set_barrier()
+
+            current.draw(screen)
+
+        divide(screen, min_x, x-1, min_y, max_y)
+        divide(screen, x+1, max_x, min_y, max_y)
+
+
+# Helper function for divide()
+def choose_orientation(width, height):
+    # True for horizontal, False for vertical
+    if width < height:
+        return True
+    elif width > height:
+        return False
+    else:
+        return choice([True, False])
 
 
 # Recursive backtracker maze generator
