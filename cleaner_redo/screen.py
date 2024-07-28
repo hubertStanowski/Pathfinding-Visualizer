@@ -7,7 +7,7 @@ import pygame
 
 
 class Screen:
-    def __init__(self, window=None, background=(0, 0, 0), animation_speed="N") -> None:
+    def __init__(self, window=None, background=BLACK, animation_speed="N") -> None:
         self.window = window
         self.background = background
         self.animation_speed = animation_speed
@@ -45,7 +45,7 @@ class Screen:
         if self.graph:
             self.graph.resize_nodes(new_window)
             if self.legend:
-                self.legend = initialize_legend(self)
+                self.update_legend(initialize_legend(self))
             if self.buttons:
                 algorithm_running = not self.buttons["action_buttons"]["RUN"].visible
                 initialize_buttons(self, algorithm_running)
@@ -61,8 +61,8 @@ class Screen:
     def update_legend(self, new_legend):
         self.legend = new_legend
 
-    def update_graph(self, new_graph):
-        self.graph = new_graph
+    def update_graph_size(self, new_graph_size):
+        self.graph = Graph(self.window, new_graph_size, self.graph.gridlines)
 
     def update_animation_speed(self, new_animation_speed):
         self.animation_speed = new_animation_speed
@@ -74,12 +74,12 @@ def initialize_screen(window):
     try:
         with open("settings.txt", "r") as file:
             graph_size, gridlines, animation_speed = file.readline().split(" ")
-            screen.update_graph(Graph(window, size=int(graph_size)))
+            screen.graph = (Graph(window, size=int(graph_size)))
             screen.graph.gridlines = bool(int(gridlines))
             screen.animation_speed = animation_speed
     except FileNotFoundError:
         screen.gridlines = False
-        screen.update_graph(Graph(window, size=MEDIUM))
+        screen.graph = (Graph(window, size=MEDIUM))
         screen.animation_speed = "N"
 
     screen.update_legend(initialize_legend(screen))

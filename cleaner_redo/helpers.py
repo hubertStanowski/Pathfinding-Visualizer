@@ -95,6 +95,7 @@ def get_big_button_size(window):
 
 def get_small_button_size(window):
     _, window_height = window.get_size()
+
     return window_height * 0.042
 
 

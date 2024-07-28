@@ -105,6 +105,12 @@ class Graph:
                 else:
                     node.reset(keep_color=False)
 
+    def reset(self):
+        self.grid = [[GraphNode(row, col) for col in range(self.size)]
+                     for row in range(self.size)]
+        self.reset_start()
+        self.reset_end()
+
     def toggle_gridlines(self):
         self.gridlines = not self.gridlines
 

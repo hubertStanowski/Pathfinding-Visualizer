@@ -46,8 +46,7 @@ def main():
                 else:
                     for label, button in screen.buttons["size_buttons"].items():
                         if button.clicked(pos):
-                            screen.update_graph(
-                                Graph(window, label, graph.gridlines))
+                            screen.update_graph_size(label)
                             update_size_buttons(screen)
 
                     for label, button in screen.buttons["animation_buttons"].items():
@@ -70,8 +69,7 @@ def main():
                             elif label == "CLEAR":
                                 graph.clear()
                             elif label == "RESET":
-                                screen.update_graph(
-                                    Graph(window, graph.size, graph.gridlines))
+                                screen.graph.reset()
 
                     for button in screen.buttons["gridline_buttons"].values():
                         if button.clicked(pos):
