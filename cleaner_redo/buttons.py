@@ -91,9 +91,9 @@ def initialize_buttons(screen, algorithm_running=False):
     # Initialize buttons for changing animation speed
     y += small_button_size * 2
 
-    animation_buttons = {"S": SmallButton(screen, "S", x, y),
-                         "N": SmallButton(screen, "N", x + diff, y),
-                         "F": SmallButton(screen, "F", x + diff*2, y)}
+    animation_buttons = {SLOW: SmallButton(screen, "S", x, y),
+                         NORMAL: SmallButton(screen, "N", x + diff, y),
+                         FAST: SmallButton(screen, "F", x + diff*2, y)}
 
     screen.add_buttons("animation_buttons", animation_buttons)
     update_animation_buttons(screen)

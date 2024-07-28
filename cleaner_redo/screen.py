@@ -7,7 +7,7 @@ import pygame
 
 
 class Screen:
-    def __init__(self, window=None, background=BLACK, animation_speed="N") -> None:
+    def __init__(self, window=None, background=BLACK, animation_speed=NORMAL) -> None:
         self.window = window
         self.background = background
         self.animation_speed = animation_speed
@@ -80,7 +80,7 @@ def initialize_screen(window):
     except FileNotFoundError:
         screen.gridlines = False
         screen.graph = (Graph(window, size=MEDIUM))
-        screen.animation_speed = "N"
+        screen.animation_speed = NORMAL
 
     screen.update_legend(initialize_legend(screen))
     initialize_buttons(screen)
