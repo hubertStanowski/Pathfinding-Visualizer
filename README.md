@@ -16,13 +16,13 @@ Inspired by: https://youtu.be/n4t_-NjY_Sg?t=183
 - On the top right you can see the node color legend.
 - Use LEFT MOUSE BUTTON to select nodes and click buttons (the first click will select the start node and the second the end node).
 - Use RIGHT MOUSE BUTTON to unselect nodes.
-- If you want to generate a maze, click any of the light green buttons ("Prim's, "Division", "Backtrack", "Random").
 - To select a pathfinding algorithm click on it; selected button will change its color.
 - To run the algorithm click "RUN" (green button).
-- While an algorithm is running you can click "FINISH" (blue button) that appread in place of "RUN" to skip animations of the algorithm"
+- While an algorithm is running you can click "FINISH" (blue button) that appeared in place of "RUN" to skip animations of the algorithm"
+- If you want to generate a maze, click any of the light green buttons ("Prim's, "Division", "Backtrack", "Random").
 - After running an algorithm you can clear the grid (click "CLEAR", yellow button) and you will keep your start and end nodes, as well as any barriers.
 - You can also reset the grid (click "RESET", red button), to remove everything.
-- To exit the program simply click "X" in the top right corner.
+- To exit the program simply click "X".
 
 ### Additional info
 - You can click "GRID OFF" button to toggle gridlines and click again on "GRID ON" to turn them off.
