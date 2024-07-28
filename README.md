@@ -9,8 +9,7 @@ Inspired by: https://youtu.be/n4t_-NjY_Sg?t=183
 ### Required setup
 
 - Make sure you have installed [Python 3](https://www.python.org/downloads/) and [pygame](https://youtu.be/Y4Jn0UCqY28?t=163).
-- For full experience make sure your screen resolution is above 1500x950 as this is the resolution of my app.
-- Download the "main_script.py" file, navigate to its directory and run with "python main_script.py" (Windows & Linux) or "python3 main_script.py" (MacOS).
+- Download the repository, navigate to its directory and run with "python main.py" or "python3 main.py".
 
 ### Basic usage
 
@@ -20,17 +19,17 @@ Inspired by: https://youtu.be/n4t_-NjY_Sg?t=183
 - If you want to generate a maze, click any of the light green buttons ("Prim's, "Division", "Backtrack", "Random").
 - To select a pathfinding algorithm click on it; selected button will change its color.
 - To run the algorithm click "RUN" (green button).
+- While an algorithm is running you can click "FINISH" (blue button) that appread in place of "RUN" to skip animations of the algorithm"
 - After running an algorithm you can clear the grid (click "CLEAR", yellow button) and you will keep your start and end nodes, as well as any barriers.
 - You can also reset the grid (click "RESET", red button), to remove everything.
-- To exit the program simply click "X" in the top right corner. **! If you do it while running an algorithm, session's settings will not be saved !**
+- To exit the program simply click "X" in the top right corner.
 
 ### Additional info
-
-- You can click "GRID OFF" button to toggle grid lines and click again on "GRID ON" to turn them off.
+- You can click "GRID OFF" button to toggle gridlines and click again on "GRID ON" to turn them off.
 - You can change the size of the graph by clicking: "S" (small), "M" (medium) and "L" (large) buttons; selected button will change its color.
 - You can change the animation speed by clicking: "S" (slow), "N" (normal) and "F" (fast) buttons; selected button will change its color.
-- Current settings will be saved to "settings.txt" file.
-- If program takes too much or too litte of your screen, change the scale or resolution (Display settings).
+- You can resize the window as any other on your machine.
+- Current settings will be saved to "settings.txt" file and loaded in next time you run the app.
 
 # About the algorithms
 
