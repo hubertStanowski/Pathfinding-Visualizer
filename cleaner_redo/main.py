@@ -1,8 +1,6 @@
 from constants import *
 from helpers import *
 from screen import initialize_screen
-from graph import Graph
-
 
 import pygame
 
@@ -60,11 +58,12 @@ def main():
                                 if graph.start and graph.end and screen.selected_algorithm:
                                     toggle_run_finish_buttons(screen)
                                     path = graph.search(screen)
-                                    toggle_run_finish_buttons(screen)
+                                    screen.animate = True
                                     if path:
                                         draw_path(screen, path)
                                     else:
                                         handle_no_path(screen)
+                                    toggle_run_finish_buttons(screen)
 
                             elif label == "CLEAR":
                                 graph.clear()

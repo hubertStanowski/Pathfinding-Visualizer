@@ -114,7 +114,6 @@ def get_big_button_font_size(window):
 
 
 def draw_path(screen, path):
-    screen.animate = True
     graph = screen.graph
     prev = path[0]
     for node in path[1:]:
@@ -126,12 +125,14 @@ def draw_path(screen, path):
             node.color = YELLOW
             node.draw(screen)
             prev = node
-        # Delay based on length relative to GRAPH_SIZE and base delay
-        delay = round(4 * graph.size / len(path) * 4 *
-                      DELAYS[screen.animation_speed][graph.size])
-        if delay > 80:
-            delay = 80
-        pygame.time.delay(delay)
+
+        if screen.animate:
+            # Delay based on length relative to GRAPH_SIZE and base delay
+            delay = round(4 * graph.size / len(path) * 4 *
+                          DELAYS[screen.animation_speed][graph.size])
+            if delay > 80:
+                delay = 80
+            pygame.time.delay(delay)
 
 
 def handle_no_path(screen):
