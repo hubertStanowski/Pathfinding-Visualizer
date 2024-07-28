@@ -1,6 +1,9 @@
-import pygame
+from constants import *
 from buttons import initialize_buttons
 from legend import initialize_legend
+from graph import Graph
+
+import pygame
 
 
 class Screen:
@@ -63,3 +66,23 @@ class Screen:
 
     def update_animation_speed(self, new_animation_speed):
         self.animation_speed = new_animation_speed
+
+
+def initialize_screen(window):
+    screen = Screen(window)
+    screen = Screen(window, background=BARRIER_COLOR)
+    try:
+        with open("settings.txt", "r") as file:
+            graph_size, gridlines, animation_speed = file.readline().split(" ")
+            screen.update_graph(Graph(window, size=int(graph_size)))
+            screen.graph.gridlines = bool(int(gridlines))
+            screen.animation_speed = animation_speed
+    except FileNotFoundError:
+        screen.gridlines = False
+        screen.update_graph(Graph(window, size=MEDIUM))
+        screen.animation_speed = "N"
+
+    screen.update_legend(initialize_legend(screen))
+    initialize_buttons(screen)
+
+    return screen

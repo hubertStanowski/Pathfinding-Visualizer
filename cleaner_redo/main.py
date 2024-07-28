@@ -1,9 +1,8 @@
 from constants import *
 from helpers import *
-from screen import Screen
+from screen import initialize_screen
 from graph import Graph
-from buttons import initialize_buttons
-from legend import initialize_legend
+
 
 import pygame
 
@@ -15,10 +14,7 @@ def main():
         (display_info.current_w, display_info.current_h), pygame.RESIZABLE)
     pygame.display.set_caption("Pathfinding Visualizer")
 
-    screen = Screen(window, background=BARRIER_COLOR)
-    screen.update_graph(Graph(window, size=MEDIUM))
-    screen.update_legend(initialize_legend(screen))
-    initialize_buttons(screen)
+    screen = initialize_screen(window)
 
     clock = pygame.time.Clock()
 
@@ -30,6 +26,7 @@ def main():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                save_settings(screen)
                 return
 
             if event.type == pygame.VIDEORESIZE:

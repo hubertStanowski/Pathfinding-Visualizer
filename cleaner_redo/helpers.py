@@ -8,8 +8,8 @@ def run_checks(screen):
     old_width, old_height = screen.window.get_size()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            raise Exception(
-                "Exiting the program while executing an algorithm! (current settings will not be saved)")
+            save_settings(screen)
+            raise Exception("Exiting the program while executing an algorithm")
 
         if event.type == pygame.VIDEORESIZE:
             new_width, new_height = get_updated_screen_dimensions(
@@ -36,6 +36,13 @@ def run_checks(screen):
                     screen.update_animation_speed(label)
                     update_animation_buttons(screen)
                     screen.draw_buttons()
+
+
+def save_settings(screen):
+    with open("settings.txt", "w") as file:
+        file.write(f"{screen.graph.size} ")
+        file.write(f"{int(screen.graph.gridlines)} ")
+        file.write(f"{screen.animation_speed}")
 
 
 def get_updated_screen_dimensions(old_dimensions, new_dimensions):
