@@ -69,7 +69,6 @@ class Screen:
 
 
 def initialize_screen(window):
-    screen = Screen(window)
     screen = Screen(window, background=BARRIER_COLOR)
     try:
         with open("settings.txt", "r") as file:
