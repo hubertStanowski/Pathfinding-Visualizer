@@ -91,4 +91,4 @@ def initialize_legend(screen):
     x -= get_legend_font_size(window, graph) * 1.05
     legend.add_node(LegendNode("Animation speed", x, y))
 
-    return legend
+    screen.update_legend(legend)

@@ -177,10 +177,10 @@ def update_gridline_buttons(screen):
 
 def update_pathfinding_buttons(screen):
     for label, button in screen.buttons["pathfinding_buttons"].items():
-        if label != screen.selected_algorithm:
-            button.color = FREE_COLOR
+        if label == screen.selected_algorithm:
+            button.select()
         else:
-            button.color = PATH_COLOR
+            button.unselect()
 
 
 def toggle_gridline_buttons(screen):

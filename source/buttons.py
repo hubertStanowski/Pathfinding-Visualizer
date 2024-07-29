@@ -23,9 +23,9 @@ class BigButton:
             current_font = pygame.font.SysFont(
                 FONT, get_big_button_font_size(window))
             label = current_font.render(self.label, True, BUTTON_FONT_COLOR)
-            text_rect = label.get_rect(
+            label_rect = label.get_rect(
                 center=(self.x + self.width // 2, self.y + self.height // 2))
-            window.blit(label, text_rect)
+            window.blit(label, label_rect)
 
     def clicked(self, pos):
         valid = (self.visible and self.rect.collidepoint(pos))
@@ -37,6 +37,12 @@ class BigButton:
                 self.last_click_time = current_time
 
         return valid
+
+    def select(self):
+        self.color = PATH_COLOR
+
+    def unselect(self):
+        self.color = FREE_COLOR
 
 
 class SmallButton:
@@ -53,9 +59,9 @@ class SmallButton:
         current_font = pygame.font.SysFont(
             FONT, get_small_button_font_size(window))
         label = current_font.render(self.label, True, BUTTON_FONT_COLOR)
-        text_rect = label.get_rect(
+        label_rect = label.get_rect(
             center=(self.x + self.size // 2, self.y + self.size // 2))
-        window.blit(label, text_rect)
+        window.blit(label, label_rect)
 
     def select(self):
         self.color = PATH_COLOR

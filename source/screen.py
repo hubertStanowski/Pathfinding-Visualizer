@@ -45,7 +45,7 @@ class Screen:
         if self.graph:
             self.graph.resize_nodes(new_window)
             if self.legend:
-                self.update_legend(initialize_legend(self))
+                initialize_legend(self)
             if self.buttons:
                 algorithm_running = not self.buttons["action_buttons"]["RUN"].visible
                 initialize_buttons(self, algorithm_running)
@@ -77,11 +77,11 @@ def initialize_screen(window):
             screen.graph.gridlines = bool(int(gridlines))
             screen.animation_speed = animation_speed
     except FileNotFoundError:
-        screen.gridlines = False
+        screen.graph.gridlines = False
         screen.graph = (Graph(window, size=MEDIUM))
         screen.animation_speed = NORMAL
 
-    screen.update_legend(initialize_legend(screen))
+    initialize_legend(screen)
     initialize_buttons(screen)
 
     return screen
