@@ -62,7 +62,9 @@ class Screen:
         self.legend = new_legend
 
     def update_graph_size(self, new_graph_size):
-        self.graph = Graph(self.window, new_graph_size, self.graph.gridlines)
+        if new_graph_size != self.graph.size:
+            self.graph = Graph(self.window, new_graph_size,
+                               self.graph.gridlines)
 
     def update_animation_speed(self, new_animation_speed):
         self.animation_speed = new_animation_speed
@@ -81,7 +83,7 @@ def initialize_screen(window):
         screen.graph = (Graph(window, size=MEDIUM))
         screen.animation_speed = NORMAL
 
-    initialize_legend(screen)
     initialize_buttons(screen)
+    initialize_legend(screen)
 
     return screen
