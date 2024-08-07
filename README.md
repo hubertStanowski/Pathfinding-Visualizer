@@ -22,7 +22,7 @@ Inspired by: https://youtu.be/n4t_-NjY_Sg?t=183
 - If you want to generate a maze, click any of the light green buttons ("Prim's, "Division", "Backtrack", "Random").
 - After running an algorithm you can clear the grid (click "CLEAR", yellow button) and you will keep your start and end nodes, as well as any barriers.
 - You can also reset the grid (click "RESET", red button), to remove everything.
-- To exit the program simply click "X".
+- To exit the program simply click "X" or use the same shortcut as for any other window on your machine.
 
 ### Additional info
 - You can click "GRID OFF" button to toggle gridlines and click again on "GRID ON" to turn them off.
