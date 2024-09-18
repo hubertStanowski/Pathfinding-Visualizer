@@ -172,8 +172,8 @@ class GraphNode:
     def draw(self, screen):
         window, graph = screen.window, screen.graph
 
-        x = get_side_tab_size(window, graph) + self.row * graph.node_size
-        y = get_tb_tab_size(window, graph) + self.col * graph.node_size
+        y = get_tb_tab_size(window, graph) + self.row * graph.node_size
+        x = get_side_tab_size(window, graph) + self.col * graph.node_size
 
         pygame.draw.rect(window, self.color,
                          (x, y, graph.node_size, graph.node_size))

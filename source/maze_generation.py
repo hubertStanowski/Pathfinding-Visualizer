@@ -144,8 +144,8 @@ def backtrack(screen, row, col):
 # Random maze generator (1/3 chance for barrier)
 def random_maze(screen):
     graph_size = screen.graph.size
-    for row in range(graph_size):
-        for col in range(graph_size):
+    for col in range(graph_size):
+        for row in range(graph_size):
             run_checks(screen)
 
             node = screen.graph.grid[row][col]

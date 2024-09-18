@@ -36,7 +36,7 @@ def main():
 
             if pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()
-                row, col = graph.get_grid_pos(window, pos)
+                col, row = graph.get_grid_pos(window, pos)
                 if graph.is_valid_node(row, col):
                     node = graph.grid[row][col]
                     graph.select_node(node)
@@ -87,7 +87,7 @@ def main():
                             toggle_run_finish_buttons(screen)
 
             elif pygame.mouse.get_pressed()[2]:
-                row, col = graph.get_grid_pos(window, pygame.mouse.get_pos())
+                col, row = graph.get_grid_pos(window, pygame.mouse.get_pos())
                 if graph.is_valid_node(row, col):
                     node = graph.grid[row][col]
                     graph.unselect_node(node)
