@@ -9,7 +9,7 @@ Inspired by: https://youtu.be/n4t_-NjY_Sg?t=183
 ### Required setup
 
 - Make sure you have installed [Python 3](https://www.python.org/downloads/) and [pygame](https://youtu.be/Y4Jn0UCqY28?t=163).
-- Download the repository, navigate to its directory and run with "python main.py" or "python3 main.py".
+- Download the repository, navigate to its directory and run with "python source/main.py" or "python3 source/main.py".
 
 ### Basic usage
 
